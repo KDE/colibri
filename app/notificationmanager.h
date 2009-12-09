@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 namespace Colibri
 {
 
-class NotificationManagerPrivate;
+class NotificationWidget;
 class NotificationManager : public QObject
 {
     Q_OBJECT
@@ -52,8 +52,12 @@ Q_SIGNALS:
     void NotificationClosed(uint id, uint reason);
     void ActionInvoked(uint id, const QString& actionKey);
 
+private Q_SLOTS:
+    void showNext();
+
 private:
-    NotificationManagerPrivate* const d;
+    QList<NotificationWidget*> mWidgets;
+    uint mNextId;
 };
 
 } // namespace
