@@ -47,7 +47,7 @@ class NotificationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    NotificationWidget(uint id, const QPixmap& pix, const QString& summary, const QString& body, int timeout);
+    NotificationWidget(uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
 
     void fadeIn();
 
@@ -68,8 +68,6 @@ private:
     uint mId;
     Qt::Alignment mAlignment;
     Plasma::FrameSvg* mBackground;
-    QLabel* mIconLabel;
-    QLabel* mTextLabel;
 
     // This timeline is used as a QTimer to handle the bubble appearance
     // duration.  It starts when initial fade in is done and ends when final
