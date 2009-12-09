@@ -81,6 +81,18 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     }
     */
 
+    if (timeout == -1) {
+        const int AVERAGE_WORD_LENGTH = 6;
+        const int WORD_PER_MINUTE = 250;
+        int count = summary.length() + body.length();
+        timeout = 60000 * count / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
+
+        // Add two seconds for the user to notice the notification, and ensure
+        // it last at least five seconds, otherwise all the user see is a
+        // flash
+        timeout = 2000 + qMin(timeout, 3000);
+    }
+
     uint id = mNextId++;
     NotificationWidget* widget = new NotificationWidget(id, pix, summary, body, timeout);
     connect(widget, SIGNAL(fadedOut()), SLOT(showNext()));
