@@ -104,8 +104,13 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
             image = image.scaled(ICON_SIZE, ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
         pix = QPixmap::fromImage(image);
-    } else if (!appIcon.isNull()) {
-        pix = KIcon(appIcon).pixmap(ICON_SIZE);
+    } else if (!appIcon.isEmpty()) {
+        pix = KIconLoader::global()->loadIcon(appIcon, KIconLoader::Panel,
+            ICON_SIZE,
+            KIconLoader::DefaultState,
+            QStringList() /* overlays */,
+            0L /* path_store */,
+            true /* canReturnNull */);
     }
 
     // UI
