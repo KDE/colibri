@@ -195,7 +195,8 @@ void NotificationWidget::fadeIn()
 {
     adjustSize();
     setInputMask();
-    QRect rect = QApplication::desktop()->availableGeometry();
+
+    QRect rect = QApplication::desktop()->availableGeometry(QCursor::pos());
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
