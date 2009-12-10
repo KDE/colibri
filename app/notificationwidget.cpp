@@ -141,9 +141,14 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
     textLabel->setText(text);
     textLabel->setWordWrap(true);
     textLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    textLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    textLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     Plasma::Theme* theme = Plasma::Theme::defaultTheme();
     textLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
+
+    int averageCharWidth = textLabel->fontMetrics().averageCharWidth();
+    textLabel->setFixedWidth(30 * averageCharWidth);
+    adjustSize();
+
     QPalette palette = textLabel->palette();
     palette.setColor(QPalette::WindowText, theme->color(Plasma::Theme::TextColor));
     textLabel->setPalette(palette);
@@ -154,11 +159,6 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
         layout->addWidget(iconLabel, 0 /* stretch */, Qt::AlignTop | Qt::AlignLeft);
     }
     layout->addWidget(textLabel);
-
-    // Ensure we have room for 20 characters
-    int averageCharWidth = QFontMetrics(textLabel->font()).averageCharWidth();
-    textLabel->setFixedWidth(20 * averageCharWidth);
-    adjustSize();
 
     // Behavior
     connect(mLifeTimeLine, SIGNAL(finished()), SLOT(fadeOut()));
