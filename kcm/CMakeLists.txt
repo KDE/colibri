@@ -1,6 +1,6 @@
 set(kcm_colibri_SRCS
     alignmentselector.cpp
-    colibrimodule.cpp
+    controlmodule.cpp
 )
 
 kde4_add_plugin(kcm_colibri ${kcm_colibri_SRCS})
