@@ -27,18 +27,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // Locale
 #include "notificationmanager.h"
 
-static const char description[] =
-    I18N_NOOP("Light notification system for KDE4");
-
-static const char version[] = "0.1.0";
+static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
+static const char* VERSION = "0.1.0";
 
 int main(int argc, char **argv)
 {
-    KAboutData about("colibri", 0, ki18n("Colibri"),
-                     version, ki18n(description),
-                     KAboutData::License_GPL,
-                     ki18n("(C) 2009 Aurélien Gâteau"),
-                     KLocalizedString(), 0, "agateau@kde.org");
+    KAboutData about(
+        "colibri", 0, ki18n("Colibri"),
+        VERSION, ki18n(DESCRIPTION),
+        KAboutData::License_GPL,
+        ki18n("(C) 2009 Aurélien Gâteau"),
+        KLocalizedString(), 0, "agateau@kde.org");
     about.addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     KCmdLineArgs::init(argc, argv, &about);
 
