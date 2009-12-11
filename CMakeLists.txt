@@ -8,3 +8,4 @@ include (KDE4Defaults)
 include_directories(${KDE4_INCLUDES} ${QT_INCLUDES})
 
 add_subdirectory(app)
+add_subdirectory(kcm)

@@ -1,0 +1,45 @@
+// vim: set tabstop=4 shiftwidth=4 expandtab:
+/*
+Colibri: Light notification system for KDE4
+Copyright 2009 Aurélien Gâteau <agateau@kde.org>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
+
+*/
+// Self
+#include "colibrimodule.moc"
+
+// KDE
+#include <KAboutData>
+#include <KPluginFactory>
+
+static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
+static const char* VERSION = "0.1.0";
+
+K_PLUGIN_FACTORY(ColibriModuleFactory, registerPlugin<ColibriModule>();)
+K_EXPORT_PLUGIN(ColibriModuleFactory("kcmcolibri"))
+
+ColibriModule::ColibriModule(QWidget* parent, const QVariantList&)
+: KCModule(ColibriModuleFactory::componentData(), parent)
+{
+    KAboutData* about = new KAboutData(
+        "colibri", 0, ki18n("Colibri"),
+        VERSION, ki18n(DESCRIPTION),
+        KAboutData::License_GPL,
+        ki18n("(C) 2009 Aurélien Gâteau"),
+        KLocalizedString(), 0, "agateau@kde.org");
+    about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
+    setAboutData(about);
+}

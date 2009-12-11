@@ -1,0 +1,14 @@
+[Desktop Entry]
+Exec=kcmshell4 colibri
+Icon=preferences-desktop-notification
+Type=Service
+X-KDE-ServiceTypes=KCModule
+X-KDE-Library=kcm_colibri
+X-KDE-ParentApp=kcontrol
+Categories=Qt;KDE;X-KDE-settings-looknfeel;
+
+X-KDE-System-Settings-Parent-Category=appearance
+
+Name=Colibri Notifications
+Comment=Configure Colibri notifications
+X-KDE-Keywords=notification
