@@ -55,6 +55,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     AlignmentSelector* selector = new AlignmentSelector;
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(selector);
+    layout->addStretch();
 }
 
 } // namespace

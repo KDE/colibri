@@ -75,11 +75,11 @@ AlignmentSelector::AlignmentSelector(QWidget* parent)
     const int bottomHeight = mScreenSvg->marginSize(Plasma::BottomMargin);
     setContentsMargins(leftWidth, topHeight, rightWidth, bottomHeight);
 
-    /*
+    // A bit ugly but should work reasonably for now
     QDesktopWidget* desktop = QApplication::desktop();
     QRect rect = desktop->availableGeometry(desktop->screenNumber(this));
-    setRatio(qreal(rect.width()) / rect.height());
-    */
+    qreal ratio = qreal(rect.width()) / rect.height();
+    setFixedSize(300, 300 / ratio);
 
     QGridLayout* layout = new QGridLayout(this);
 
