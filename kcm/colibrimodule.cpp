@@ -21,17 +21,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // Self
 #include "colibrimodule.moc"
 
+// Qt
+#include <QVBoxLayout>
+
 // KDE
 #include <KAboutData>
 #include <KPluginFactory>
 
+// Local
+#include "alignmentselector.h"
+
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
 static const char* VERSION = "0.1.0";
 
-K_PLUGIN_FACTORY(ColibriModuleFactory, registerPlugin<ColibriModule>();)
+K_PLUGIN_FACTORY(ColibriModuleFactory, registerPlugin<Colibri::ControlModule>();)
 K_EXPORT_PLUGIN(ColibriModuleFactory("kcmcolibri"))
 
-ColibriModule::ColibriModule(QWidget* parent, const QVariantList&)
+namespace Colibri
+{
+
+ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
 {
     KAboutData* about = new KAboutData(
@@ -42,4 +51,10 @@ ColibriModule::ColibriModule(QWidget* parent, const QVariantList&)
         KLocalizedString(), 0, "agateau@kde.org");
     about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     setAboutData(about);
+
+    AlignmentSelector* selector = new AlignmentSelector;
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(selector);
 }
+
+} // namespace

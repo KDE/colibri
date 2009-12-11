@@ -3,6 +3,8 @@
 Colibri: Light notification system for KDE4
 Copyright 2009 Aurélien Gâteau <agateau@kde.org>
 
+Based on Ayatana Notifications for Plasma, Copyright 2009 Canonical Ltd.
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -18,22 +20,41 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
 
 */
-#ifndef COLIBRIMODULE_H
-#define COLIBRIMODULE_H
+#ifndef ALIGNMENTSELECTOR_H
+#define ALIGNMENTSELECTOR_H
 
-// KDE
-#include <KCModule>
+// Qt
+#include <QWidget>
+
+namespace Plasma {
+class FrameSvg;
+}
+
+class QButtonGroup;
 
 namespace Colibri
 {
 
-class ControlModule : public KCModule
+class AlignmentSelector : public QWidget
 {
     Q_OBJECT
+
 public:
-    ControlModule(QWidget*, const QVariantList&);
+    AlignmentSelector(QWidget* parent = 0);
+
+    void setAlignment(Qt::Alignment);
+    Qt::Alignment alignment() const;
+
+protected:
+    virtual void resizeEvent(QResizeEvent*);
+    virtual void paintEvent(QPaintEvent*);
+
+private:
+    QWidget* mContent;
+    QButtonGroup* mButtonGroup;
+    Plasma::FrameSvg* mScreenSvg;
 };
 
 } // namespace
 
-#endif /* COLIBRIMODULE_H */
+#endif /* ALIGNMENTSELECTOR_H */
