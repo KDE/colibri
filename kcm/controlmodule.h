@@ -26,12 +26,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 namespace Colibri
 {
+class Config;
 
 class ControlModule : public KCModule
 {
     Q_OBJECT
 public:
     ControlModule(QWidget*, const QVariantList&);
+
+private:
+    QScopedPointer<Config> mConfig;
 };
 
 } // namespace

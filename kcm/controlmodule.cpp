@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 // Local
 #include "alignmentselector.h"
+#include "config.h"
 
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
 static const char* VERSION = "0.1.0";
@@ -42,6 +43,7 @@ namespace Colibri
 
 ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
+, mConfig(new Config)
 {
     KAboutData* about = new KAboutData(
         "colibri", 0, ki18n("Colibri"),
@@ -53,6 +55,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     setAboutData(about);
 
     AlignmentSelector* selector = new AlignmentSelector;
+    selector->setAlignment(Qt::Alignment(mConfig->alignment()));
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(selector);
     layout->addStretch();
