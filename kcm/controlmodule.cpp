@@ -44,6 +44,7 @@ namespace Colibri
 ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
 , mConfig(new Config)
+, mAlignmentSelector(new AlignmentSelector)
 {
     KAboutData* about = new KAboutData(
         "colibri", 0, ki18n("Colibri"),
@@ -54,11 +55,29 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     setAboutData(about);
 
-    AlignmentSelector* selector = new AlignmentSelector;
-    selector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    connect(mAlignmentSelector, SIGNAL(changed(Qt::Alignment)), SLOT(slotAlignmentChanged(Qt::Alignment)));
+
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(selector);
+    layout->addWidget(mAlignmentSelector);
     layout->addStretch();
+}
+
+void ControlModule::load()
+{
+    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+}
+
+void ControlModule::save()
+{
+}
+
+void ControlModule::defaults()
+{
+}
+
+void ControlModule::slotAlignmentChanged(Qt::Alignment alignment)
+{
+    unmanagedWidgetChangeState(int(alignment) != mConfig->alignment());
 }
 
 } // namespace

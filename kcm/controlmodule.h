@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 namespace Colibri
 {
 class Config;
+class AlignmentSelector;
 
 class ControlModule : public KCModule
 {
@@ -34,8 +35,17 @@ class ControlModule : public KCModule
 public:
     ControlModule(QWidget*, const QVariantList&);
 
+public Q_SLOTS:
+    virtual void load();
+    virtual void save();
+    virtual void defaults();
+
+private Q_SLOTS:
+    void slotAlignmentChanged(Qt::Alignment);
+
 private:
     QScopedPointer<Config> mConfig;
+    AlignmentSelector* mAlignmentSelector;
 };
 
 } // namespace
