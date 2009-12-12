@@ -196,6 +196,11 @@ void NotificationWidget::setInputMask()
     XFreePixmap(QX11Info::display(), mask);
 }
 
+void NotificationWidget::setAlignment(Qt::Alignment alignment)
+{
+    mAlignment = alignment;
+}
+
 void NotificationWidget::fadeIn()
 {
     adjustSize();

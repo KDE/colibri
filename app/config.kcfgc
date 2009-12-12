@@ -1,0 +1,5 @@
+File=config.kcfg
+Classname=Config
+NameSpace=Colibri
+Singleton=false
+Mutators=true

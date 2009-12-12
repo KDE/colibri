@@ -51,6 +51,8 @@ public:
 
     void fadeIn();
 
+    void setAlignment(Qt::Alignment);
+
 Q_SIGNALS:
     void fadedOut();
 

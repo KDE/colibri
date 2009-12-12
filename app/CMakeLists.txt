@@ -1,7 +1,6 @@
 # for dbus_add_activation_service
 include(PkgConfigGetVar)
 
-
 set(colibri_SRCS
     main.cpp
     notificationmanager.cpp
@@ -12,6 +11,10 @@ dbus_add_activation_service(org.freedesktop.Notifications.service.in)
 
 qt4_add_dbus_adaptor(colibri_SRCS org.freedesktop.Notifications.xml
     notificationmanager.h Colibri::NotificationManager)
+
+kde4_add_kcfg_files(colibri_SRCS
+    config.kcfgc
+)
 
 kde4_add_executable(colibri ${colibri_SRCS})
 

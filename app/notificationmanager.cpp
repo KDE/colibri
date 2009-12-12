@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <KUrl>
 
 // Local
+#include <config.h>
 #include <notificationsadaptor.h>
 #include <notificationwidget.h>
 
@@ -40,6 +41,7 @@ namespace Colibri
 
 NotificationManager::NotificationManager()
 : mNextId(1)
+, mConfig(new Config)
 {
     new NotificationsAdaptor(this);
     bool ok;
@@ -189,6 +191,7 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
 
     // Create widget
     NotificationWidget* widget = new NotificationWidget(id, image, appIcon, summary, body, timeout);
+    widget->setAlignment(Qt::Alignment(mConfig->alignment()));
     connect(widget, SIGNAL(fadedOut()), SLOT(showNext()));
     mWidgets << widget;
     if (mWidgets.size() == 1) {
