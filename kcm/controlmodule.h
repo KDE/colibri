@@ -41,7 +41,7 @@ public Q_SLOTS:
     virtual void defaults();
 
 private Q_SLOTS:
-    void slotAlignmentChanged(Qt::Alignment);
+    void updateUnmanagedWidgetChangeState();
 
 private:
     QScopedPointer<Config> mConfig;

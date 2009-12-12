@@ -55,7 +55,8 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     setAboutData(about);
 
-    connect(mAlignmentSelector, SIGNAL(changed(Qt::Alignment)), SLOT(slotAlignmentChanged(Qt::Alignment)));
+    connect(mAlignmentSelector, SIGNAL(changed(Qt::Alignment)),
+        SLOT(updateUnmanagedWidgetChangeState()));
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(mAlignmentSelector);
@@ -65,19 +66,28 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 void ControlModule::load()
 {
     mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    KCModule::load();
 }
 
 void ControlModule::save()
 {
+    mConfig->setAlignment(int(mAlignmentSelector->alignment()));
+    KCModule::save();
 }
 
 void ControlModule::defaults()
 {
+    KCModule::defaults();
+    bool useDefaults = mConfig->useDefaults(true);
+    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    mConfig->useDefaults(useDefaults);
+    updateUnmanagedWidgetChangeState();
 }
 
-void ControlModule::slotAlignmentChanged(Qt::Alignment alignment)
+void ControlModule::updateUnmanagedWidgetChangeState()
 {
-    unmanagedWidgetChangeState(int(alignment) != mConfig->alignment());
+    int alignment = int(mAlignmentSelector->alignment());
+    unmanagedWidgetChangeState(alignment != mConfig->alignment());
 }
 
 } // namespace
