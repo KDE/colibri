@@ -72,6 +72,7 @@ void ControlModule::load()
 void ControlModule::save()
 {
     mConfig->setAlignment(int(mAlignmentSelector->alignment()));
+    mConfig->writeConfig();
     KCModule::save();
 }
 
