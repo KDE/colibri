@@ -67,6 +67,7 @@ AlignmentSelector::AlignmentSelector(QWidget* parent)
 : QWidget(parent)
 , mButtonGroup(new QButtonGroup(this))
 , mScreenSvg(new Plasma::FrameSvg(this))
+, mPreviousCheckedId(-1)
 {
     mScreenSvg->setImagePath("widgets/monitor");
     const int topHeight = mScreenSvg->marginSize(Plasma::TopMargin);
@@ -91,16 +92,33 @@ AlignmentSelector::AlignmentSelector(QWidget* parent)
     createButton(layout, mButtonGroup, Qt::AlignBottom | Qt::AlignLeft);
     createButton(layout, mButtonGroup, Qt::AlignBottom | Qt::AlignHCenter);
     createButton(layout, mButtonGroup, Qt::AlignBottom | Qt::AlignRight);
+    connect(mButtonGroup, SIGNAL(buttonClicked(int)),
+        SLOT(slotButtonClicked(int)));
 }
 
 void AlignmentSelector::setAlignment(Qt::Alignment alignment)
 {
-    QAbstractButton* button = mButtonGroup->button(int(alignment));
+    int id = int(alignment);
+    QAbstractButton* button = mButtonGroup->button(id);
     if (!button) {
         kWarning() << "No button for alignment" << alignment;
         return;
     }
+    mPreviousCheckedId = id;
     button->setChecked(true);
+}
+
+void AlignmentSelector::slotButtonClicked(int id)
+{
+    if (mPreviousCheckedId == -1) {
+        mPreviousCheckedId = id;
+        return;
+    }
+    if (mPreviousCheckedId == id) {
+        return;
+    }
+    mPreviousCheckedId = id;
+    emit changed(Qt::Alignment(id));
 }
 
 Qt::Alignment AlignmentSelector::alignment() const

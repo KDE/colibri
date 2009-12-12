@@ -45,14 +45,21 @@ public:
     void setAlignment(Qt::Alignment);
     Qt::Alignment alignment() const;
 
+Q_SIGNALS:
+    void changed(Qt::Alignment);
+
 protected:
     virtual void resizeEvent(QResizeEvent*);
     virtual void paintEvent(QPaintEvent*);
+
+private Q_SLOTS:
+    void slotButtonClicked(int);
 
 private:
     QWidget* mContent;
     QButtonGroup* mButtonGroup;
     Plasma::FrameSvg* mScreenSvg;
+    int mPreviousCheckedId;
 };
 
 } // namespace
