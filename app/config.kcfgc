@@ -1,5 +1,5 @@
 File=config.kcfg
-Classname=Config
+ClassName=Config
 NameSpace=Colibri
 Singleton=false
 Mutators=true
