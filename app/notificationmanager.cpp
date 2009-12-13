@@ -191,6 +191,9 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
 
     // Create widget
     NotificationWidget* widget = new NotificationWidget(id, image, appIcon, summary, body, timeout);
+
+    // Update config, KCM may have changed it
+    mConfig->readConfig();
     widget->setAlignment(Qt::Alignment(mConfig->alignment()));
     connect(widget, SIGNAL(fadedOut()), SLOT(showNext()));
     mWidgets << widget;
