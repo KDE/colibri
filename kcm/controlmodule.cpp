@@ -79,9 +79,7 @@ void ControlModule::save()
 void ControlModule::defaults()
 {
     KCModule::defaults();
-    bool useDefaults = mConfig->useDefaults(true);
-    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
-    mConfig->useDefaults(useDefaults);
+    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->defaultAlignmentValue()));
     updateUnmanagedWidgetChangeState();
 }
 
