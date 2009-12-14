@@ -3,6 +3,10 @@ set(kcm_colibri_SRCS
     controlmodule.cpp
 )
 
+kde4_add_ui_files(kcm_colibri_SRCS
+    controlmodule.ui
+)
+
 kde4_add_kcfg_files(kcm_colibri_SRCS
     ../app/config.kcfgc
 )

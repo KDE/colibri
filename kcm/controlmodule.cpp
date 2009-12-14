@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // Local
 #include "alignmentselector.h"
 #include "config.h"
+#include "ui_controlmodule.h"
 
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
 static const char* VERSION = "0.1.0";
@@ -44,7 +45,7 @@ namespace Colibri
 ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
 , mConfig(new Config)
-, mAlignmentSelector(new AlignmentSelector)
+, mUi(new Ui::ControlModule)
 {
     KAboutData* about = new KAboutData(
         "colibri", 0, ki18n("Colibri"),
@@ -55,23 +56,21 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     setAboutData(about);
 
-    connect(mAlignmentSelector, SIGNAL(changed(Qt::Alignment)),
-        SLOT(updateUnmanagedWidgetChangeState()));
+    mUi->setupUi(this);
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(mAlignmentSelector);
-    layout->addStretch();
+    connect(mUi->alignmentSelector, SIGNAL(changed(Qt::Alignment)),
+        SLOT(updateUnmanagedWidgetChangeState()));
 }
 
 void ControlModule::load()
 {
-    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
     KCModule::load();
 }
 
 void ControlModule::save()
 {
-    mConfig->setAlignment(int(mAlignmentSelector->alignment()));
+    mConfig->setAlignment(int(mUi->alignmentSelector->alignment()));
     mConfig->writeConfig();
     KCModule::save();
 }
@@ -79,13 +78,13 @@ void ControlModule::save()
 void ControlModule::defaults()
 {
     KCModule::defaults();
-    mAlignmentSelector->setAlignment(Qt::Alignment(mConfig->defaultAlignmentValue()));
+    mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->defaultAlignmentValue()));
     updateUnmanagedWidgetChangeState();
 }
 
 void ControlModule::updateUnmanagedWidgetChangeState()
 {
-    int alignment = int(mAlignmentSelector->alignment());
+    int alignment = int(mUi->alignmentSelector->alignment());
     unmanagedWidgetChangeState(alignment != mConfig->alignment());
 }
 

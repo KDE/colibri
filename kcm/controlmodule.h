@@ -24,6 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // KDE
 #include <KCModule>
 
+namespace Ui
+{
+class ControlModule;
+}
+
 namespace Colibri
 {
 class Config;
@@ -45,7 +50,7 @@ private Q_SLOTS:
 
 private:
     QScopedPointer<Config> mConfig;
-    AlignmentSelector* mAlignmentSelector;
+    QScopedPointer<Ui::ControlModule> mUi;
 };
 
 } // namespace
