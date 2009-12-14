@@ -58,7 +58,7 @@ private Q_SLOTS:
 private:
     QWidget* mContent;
     QButtonGroup* mButtonGroup;
-    Plasma::FrameSvg* mScreenSvg;
+    Plasma::FrameSvg* mMonitorSvg;
     int mPreviousCheckedId;
 };
 

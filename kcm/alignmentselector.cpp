@@ -66,15 +66,13 @@ static void createButton(QGridLayout* layout, QButtonGroup* group, Qt::Alignment
 AlignmentSelector::AlignmentSelector(QWidget* parent)
 : QWidget(parent)
 , mButtonGroup(new QButtonGroup(this))
-, mScreenSvg(new Plasma::FrameSvg(this))
+, mMonitorSvg(new Plasma::FrameSvg(this))
 , mPreviousCheckedId(-1)
 {
-    mScreenSvg->setImagePath("widgets/monitor");
-    const int topHeight = mScreenSvg->marginSize(Plasma::TopMargin);
-    const int leftWidth = mScreenSvg->marginSize(Plasma::LeftMargin);
-    const int rightWidth = mScreenSvg->marginSize(Plasma::RightMargin);
-    const int bottomHeight = mScreenSvg->marginSize(Plasma::BottomMargin);
-    setContentsMargins(leftWidth, topHeight, rightWidth, bottomHeight);
+    mMonitorSvg->setImagePath("widgets/monitor");
+    qreal left, top, right, bottom;
+    mMonitorSvg->getMargins(left, top, right, bottom);
+    setContentsMargins(left, top, right, bottom);
 
     // A bit ugly but should work reasonably for now
     QDesktopWidget* desktop = QApplication::desktop();
@@ -128,14 +126,14 @@ Qt::Alignment AlignmentSelector::alignment() const
 
 void AlignmentSelector::resizeEvent(QResizeEvent*)
 {
-    mScreenSvg->resizeFrame(size());
+    mMonitorSvg->resizeFrame(size());
 }
 
 void AlignmentSelector::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    mScreenSvg->paintFrame(&painter);
+    mMonitorSvg->paintFrame(&painter);
 }
 
 } // namespace
