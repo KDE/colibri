@@ -8,10 +8,19 @@ provide any buttons. You may or may not like this.
 Since they are completely passive, they smoothly fade away when you mouse over
 them, allowing you to interact with any window behind them.
 
+They also do not stack each others: if multiple notifications happen, they will
+be shown one at a time.
+
+Colibri is licensed under the GNU GPLv2 or later.
 
 # Building it
 
-You need kdelibs >= 4.3.
+You need kdelibs >= 4.4.
+
+It will build with 4.3, but notifications from KDE applications will not go
+through Colibri because kdelibs 4.3 does not use FreeDesktop notifications
+(unless you are using Kubuntu Karmic, which backported the FreeDesktop
+notifications support).
 
 Build it with:
 
@@ -37,21 +46,28 @@ Enabling Colibri notifications can be a bit tricky:
 
 ## Second, check the .service file
 
-Make sure the .service file is correctly installed. On most systems you
-should be able to find it here:
+Make sure the .service file is correctly installed. On most systems it should
+be there: 
 
 /usr/share/dbus-1/services/org.freedesktop.Notifications.service
 
-This file should contains an "Exec" line pointing to Colibri binary.
+This file should contains an "Exec=..." line pointing to Colibri binary.
 
 
 ## Third, test it
 
 Run this:
 
-    kdialog --passivepopup Hello
+    notify-send Hello
 
 You should get a nice Colibri notification in the top-right corner.
+
+(You may need to install a separate package for notify-send. On Kubuntu, the
+package is libnotify-bin)
+
+Here is a nicer one:
+
+    notify-send -i dialog-information 'Hello!' 'This is a Colibri notification'
 
 
 # Configuration
@@ -61,14 +77,15 @@ configured from "System Settings": Colibri installs a configuration module in
 the "Appearance" category.
 
 
-# A bit of politics
+# A bit of history
 
-Colibri is a standalone implementation of Ayatana notifications for Plasma, an
-alternative notification system which I implemented in Kubuntu Karmic as part
-of my work for Canonical.
+Passive notifications for Plasma first appeared as "Ayatana notifications", an
+alternative notification system I implemented in Kubuntu Karmic as part of my
+work for Canonical.
 
 Ayatana notifications were implemented as a patch against the systemtray
-applet. Colibri notifications do not require patching any applet.
+applet. Colibri is based on this work, but does not require patching any
+applet.
 
 Colibri contains code I wrote for Canonical, but it is not a Canonical product.
 
