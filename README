@@ -1,1 +1,78 @@
-Light notifications for KDE4
+# What is it?
+
+Colibri provides an alternative to KDE4 Plasma notifications.
+
+Colibri notifications look lighter and are completely passive: they do not
+provide any buttons. You may or may not like this.
+
+Since they are completely passive, they smoothly fade away when you mouse over
+them, allowing you to interact with any window behind them.
+
+
+# Building it
+
+You need kdelibs >= 4.3.
+
+Build it with:
+
+    mkdir build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr <path/to/colibri/sources>
+    make
+    sudo make install
+
+You may need to replace /usr with the path to your KDE installation.
+
+# Enabling Colibri notifications
+
+Enabling Colibri notifications can be a bit tricky:
+
+
+## First, disable Plasma notifications
+
+- Right-click on the systemtray applet
+- Select "System Tray Settings"
+- Uncheck the "Application notifications" box
+
+
+## Second, check the .service file
+
+Make sure the .service file is correctly installed. On most systems you
+should be able to find it here:
+
+/usr/share/dbus-1/services/org.freedesktop.Notifications.service
+
+This file should contains an "Exec" line pointing to Colibri binary.
+
+
+## Third, test it
+
+Run this:
+
+    kdialog --passivepopup Hello
+
+You should get a nice Colibri notification in the top-right corner.
+
+
+# Configuration
+
+The only configuration for now is the position of the notification. This can be
+configured from "System Settings": Colibri installs a configuration module in
+the "Appearance" category.
+
+
+# A bit of politics
+
+Colibri is a standalone implementation of Ayatana notifications for Plasma, an
+alternative notification system which I implemented in Kubuntu Karmic as part
+of my work for Canonical.
+
+Ayatana notifications were implemented as a patch against the systemtray
+applet. Colibri notifications do not require patching any applet.
+
+Colibri contains code I wrote for Canonical, but it is not a Canonical product.
+
+
+# Author
+
+Aurélien Gâteau <agateau@kde.org>
