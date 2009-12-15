@@ -60,7 +60,7 @@ private Q_SLOTS:
 private:
     QList<NotificationWidget*> mWidgets;
     uint mNextId;
-    QScopedPointer<Config> mConfig;
+    Config* mConfig;
 };
 
 } // namespace

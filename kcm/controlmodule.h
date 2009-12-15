@@ -39,6 +39,7 @@ class ControlModule : public KCModule
     Q_OBJECT
 public:
     ControlModule(QWidget*, const QVariantList&);
+    ~ControlModule();
 
 public Q_SLOTS:
     virtual void load();
@@ -49,8 +50,8 @@ private Q_SLOTS:
     void updateUnmanagedWidgetChangeState();
 
 private:
-    QScopedPointer<Config> mConfig;
-    QScopedPointer<Ui::ControlModule> mUi;
+    Config* mConfig;
+    Ui::ControlModule* mUi;
 };
 
 } // namespace

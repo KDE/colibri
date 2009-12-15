@@ -61,6 +61,7 @@ NotificationManager::NotificationManager()
 
 NotificationManager::~NotificationManager()
 {
+    delete mConfig;
 }
 
 inline void copyLineRGB32(QRgb* dst, const char* src, int width)

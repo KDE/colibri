@@ -62,6 +62,12 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
         SLOT(updateUnmanagedWidgetChangeState()));
 }
 
+ControlModule::~ControlModule()
+{
+    delete mConfig;
+    delete mUi;
+}
+
 void ControlModule::load()
 {
     mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
@@ -78,7 +84,13 @@ void ControlModule::save()
 void ControlModule::defaults()
 {
     KCModule::defaults();
+#if KDE_IS_VERSION(4, 4, 0)
     mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->defaultAlignmentValue()));
+#else
+    bool useDefaults = mConfig->useDefaults(true);
+    mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    mConfig->useDefaults(useDefaults);
+#endif
     updateUnmanagedWidgetChangeState();
 }
 
