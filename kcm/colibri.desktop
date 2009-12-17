@@ -7,7 +7,7 @@ X-KDE-Library=kcm_colibri
 X-KDE-ParentApp=kcontrol
 Categories=Qt;KDE;X-KDE-settings-looknfeel;
 
-X-KDE-System-Settings-Parent-Category=appearance
+X-KDE-System-Settings-Parent-Category=desktop
 
 Name=Colibri Notifications
 Comment=Configure Colibri notifications
