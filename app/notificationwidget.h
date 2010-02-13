@@ -54,7 +54,7 @@ public:
     void setAlignment(Qt::Alignment);
 
 Q_SIGNALS:
-    void fadedOut();
+    void closed(uint id, uint reason);
 
 protected:
     virtual void paintEvent(QPaintEvent*);

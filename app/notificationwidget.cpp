@@ -53,6 +53,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 namespace Colibri
 {
 
+static const uint CLOSE_REASON_EXPIRED        = 1;
+static const uint CLOSE_REASON_CLOSED_BY_USER = 2;
+static const uint CLOSE_REASON_CLOSED_BY_APP  = 3;
+
 static const int DEFAULT_BUBBLE_MIN_HEIGHT = 50;
 static const int DEFAULT_FADE_IN_TIMEOUT   = 250;
 static const int DEFAULT_FADE_OUT_TIMEOUT  = 1000;
@@ -329,7 +333,7 @@ void NotificationWidget::slotFadeTimeLineFinished()
     if (mFadeTimeLine->direction() == QTimeLine::Forward) {
         startLifeTimer();
     } else {
-        emit fadedOut();
+        emit closed(mId, CLOSE_REASON_EXPIRED);
     }
 }
 

@@ -196,7 +196,7 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     // Update config, KCM may have changed it
     mConfig->readConfig();
     widget->setAlignment(Qt::Alignment(mConfig->alignment()));
-    connect(widget, SIGNAL(fadedOut()), SLOT(showNext()));
+    connect(widget, SIGNAL(closed(uint, uint)), SLOT(slotNotificationWidgetClosed(uint, uint)));
     mWidgets << widget;
     if (mWidgets.size() == 1) {
         widget->fadeIn();
@@ -227,8 +227,10 @@ QString NotificationManager::GetServerInformation(QString& vendor, QString& vers
     return KCmdLineArgs::aboutData()->appName();
 }
 
-void NotificationManager::showNext()
+void NotificationManager::slotNotificationWidgetClosed(uint id, uint reason)
 {
+    NotificationClosed(id, reason);
+
     if (mWidgets.isEmpty()) {
         kWarning() << "mWidgets should not be empty!";
         return;

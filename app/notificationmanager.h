@@ -55,7 +55,7 @@ Q_SIGNALS:
     void ActionInvoked(uint id, const QString& actionKey);
 
 private Q_SLOTS:
-    void showNext();
+    void slotNotificationWidgetClosed(uint id, uint reason);
 
 private:
     QList<NotificationWidget*> mWidgets;
