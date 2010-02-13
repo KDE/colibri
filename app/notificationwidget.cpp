@@ -76,6 +76,7 @@ static const qreal NON_COMPOSITED_OPACITY_THRESHOLD = .4;
 
 NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
 : mId(id)
+, mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mBackground(new Plasma::FrameSvg(this))
 , mLifeTimeLine(new QTimeLine(DEFAULT_ON_SCREEN_TIMEOUT, this))
@@ -203,6 +204,13 @@ void NotificationWidget::setInputMask()
 void NotificationWidget::setAlignment(Qt::Alignment alignment)
 {
     mAlignment = alignment;
+}
+
+void NotificationWidget::closeWidget()
+{
+    mLifeTimeLine->stop();
+    mCloseReason = CLOSE_REASON_CLOSED_BY_APP;
+    fadeOut();
 }
 
 void NotificationWidget::fadeIn()
@@ -333,7 +341,7 @@ void NotificationWidget::slotFadeTimeLineFinished()
     if (mFadeTimeLine->direction() == QTimeLine::Forward) {
         startLifeTimer();
     } else {
-        emit closed(mId, CLOSE_REASON_EXPIRED);
+        emit closed(mId, mCloseReason);
     }
 }
 

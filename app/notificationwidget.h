@@ -53,6 +53,11 @@ public:
 
     void setAlignment(Qt::Alignment);
 
+    uint id() const { return mId; }
+
+    // Not named close() to avoid confusion with QWidget::close()
+    void closeWidget();
+
 Q_SIGNALS:
     void closed(uint id, uint reason);
 
@@ -68,6 +73,7 @@ private Q_SLOTS:
 
 private:
     uint mId;
+    uint mCloseReason;
     Qt::Alignment mAlignment;
     Plasma::FrameSvg* mBackground;
 

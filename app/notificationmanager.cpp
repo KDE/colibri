@@ -206,7 +206,12 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
 
 void NotificationManager::CloseNotification(uint id)
 {
-    Q_UNUSED(id);
+    Q_FOREACH(NotificationWidget* widget, mWidgets) {
+        if (widget->id() == id) {
+            widget->closeWidget();
+            return;
+        }
+    }
 }
 
 QStringList NotificationManager::GetCapabilities()
