@@ -152,7 +152,6 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     Q_UNUSED(appName);
     Q_UNUSED(replacesId);
     Q_UNUSED(actions);
-    kDebug() << appName << summary << body;
     QPixmap pix;
     Q_UNUSED(appIcon);
 
@@ -201,6 +200,7 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     if (mWidgets.size() == 1) {
         widget->fadeIn();
     }
+    kDebug() << "id:" << id << "app:" << appName << "summary:" << summary << "body:" << body;
     return id;
 }
 
