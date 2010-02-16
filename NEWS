@@ -1,2 +1,8 @@
+# 2010.02.16 - 0.1.1
+- Moved the KCM to the Desktop category.
+- Emit the NotificationClosed() signal when a notification is closed. This fixes
+  double notifications from Banshee.
+- Implement the CloseNotification() method.
+
 # 2009.12.15 - 0.1.0
 - First release.
