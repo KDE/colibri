@@ -47,7 +47,7 @@ Enabling Colibri notifications can be a bit tricky:
 ## Second, check the .service file
 
 Make sure the .service file is correctly installed. On most systems it should
-be there: 
+be there:
 
 /usr/share/dbus-1/services/org.freedesktop.Notifications.service
 
@@ -74,7 +74,7 @@ Here is a nicer one:
 
 The only configuration for now is the position of the notification. This can be
 configured from "System Settings": Colibri installs a configuration module in
-the "Appearance" category.
+the "Desktop" category.
 
 
 # A bit of history
