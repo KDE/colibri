@@ -69,6 +69,18 @@ Here is a nicer one:
 
     notify-send -i dialog-information 'Hello!' 'This is a Colibri notification'
 
+If for some reason you do not get a Colibri notification, you can configure KDE
+to start Colibri at login time, instead of relying on DBus activation (triggered
+by the org.freedesktop.Notifications.service file). This can be done via System
+Settings:
+
+- Go to the "Advanced" tab
+- Open the "Autostart" module
+- Click on "Add Program..."
+- Enter "/usr/bin/colibri" (or wherever the colibri binary happens to be
+  installed)
+- Click "OK"
+
 
 # Configuration
 
