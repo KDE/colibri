@@ -8,7 +8,12 @@ X-KDE-ParentApp=kcontrol
 Categories=Qt;KDE;X-KDE-settings-looknfeel;
 
 X-KDE-System-Settings-Parent-Category=desktop
+X-KDE-Keywords=notification
 
 Name=Colibri Notifications
+Name[sr]=Колибри обавештења
+Name[sr@latin]=Kolibri obaveštenja
+
 Comment=Configure Colibri notifications
-X-KDE-Keywords=notification
+Comment[sr]=Подешавање Колибри обавештења
+Comment[sr@latin]=Podešavanje Kolibri obaveštenja
