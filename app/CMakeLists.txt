@@ -20,7 +20,6 @@ kde4_add_executable(colibri ${colibri_SRCS})
 
 target_link_libraries(colibri
     ${KDE4_KDEUI_LIBS}
-    ${KDE4_KPARTS_LIBS}
     ${KDE4_PLASMA_LIBS}
 )
 
