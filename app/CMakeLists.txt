@@ -7,7 +7,7 @@ set(colibri_SRCS
     notificationwidget.cpp
 )
 
-dbus_add_activation_service(org.freedesktop.Notifications.service.in)
+dbus_add_activation_service(colibri-org.freedesktop.Notifications.service.in)
 
 qt4_add_dbus_adaptor(colibri_SRCS org.freedesktop.Notifications.xml
     notificationmanager.h Colibri::NotificationManager)
