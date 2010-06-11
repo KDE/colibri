@@ -147,13 +147,9 @@ static QString findImageForSpecImagePath(const QString &_path)
                                            true /* canReturnNull */);
 }
 
-uint NotificationManager::Notify(const QString& appName, uint replacesId, const QString& appIcon, const QString& summary, const QString& body, const QStringList& actions, const QVariantMap& hints, int timeout)
+uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int timeout)
 {
-    Q_UNUSED(appName);
-    Q_UNUSED(replacesId);
-    Q_UNUSED(actions);
     QPixmap pix;
-    Q_UNUSED(appIcon);
 
     // image
     QImage image;
