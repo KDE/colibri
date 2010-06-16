@@ -61,6 +61,8 @@ private:
     QList<NotificationWidget*> mWidgets;
     uint mNextId;
     Config* mConfig;
+
+    NotificationWidget* findWidget(const QString& appName, const QString& summary);
 };
 
 } // namespace

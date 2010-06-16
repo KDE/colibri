@@ -74,8 +74,12 @@ static const qreal MOUSE_OVER_OPACITY_MIN = .4;
 // the widget will be hidden (should not be less than MOUSE_OVER_OPACITY_MIN!)
 static const qreal NON_COMPOSITED_OPACITY_THRESHOLD = .4;
 
-NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
-: mId(id)
+NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
+: mAppName(appName)
+, mId(id)
+, mSummary(summary)
+, mBody(body)
+, mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mBackground(new Plasma::FrameSvg(this))
@@ -88,18 +92,6 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
     mLifeTimeLine->setDuration(timeout == 0
                                 ? DEFAULT_ON_SCREEN_TIMEOUT
                                 : timeout);
-
-    // Text
-    QString text;
-    if (!summary.isEmpty()) {
-        text = "<b>" + summary + "</b>";
-    }
-    if (!body.isEmpty()) {
-        if (!summary.isEmpty()) {
-            text += "<br/>";
-        }
-        text += body;
-    }
 
     // Icon
     QPixmap pix;
@@ -142,28 +134,27 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
         iconLabel->setPixmap(pix);
     }
 
-    QLabel* textLabel = new QLabel(this);
-    textLabel->setText(text);
-    textLabel->setWordWrap(true);
-    textLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    textLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    mTextLabel->setWordWrap(true);
+    mTextLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     Plasma::Theme* theme = Plasma::Theme::defaultTheme();
-    textLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
+    mTextLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
 
-    int averageCharWidth = textLabel->fontMetrics().averageCharWidth();
-    textLabel->setFixedWidth(30 * averageCharWidth);
+    int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
+    mTextLabel->setFixedWidth(30 * averageCharWidth);
+    updateTextLabel();
     adjustSize();
 
-    QPalette palette = textLabel->palette();
+    QPalette palette = mTextLabel->palette();
     palette.setColor(QPalette::WindowText, theme->color(Plasma::Theme::TextColor));
-    textLabel->setPalette(palette);
+    mTextLabel->setPalette(palette);
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setSpacing(KDialog::spacingHint());
     if (iconLabel) {
         layout->addWidget(iconLabel, 0 /* stretch */, Qt::AlignTop | Qt::AlignLeft);
     }
-    layout->addWidget(textLabel);
+    layout->addWidget(mTextLabel);
 
     // Behavior
     connect(mLifeTimeLine, SIGNAL(finished()), SLOT(fadeOut()));
@@ -178,6 +169,29 @@ NotificationWidget::NotificationWidget(uint id, const QImage& image_, const QStr
     mMousePollTimer->setInterval(MOUSE_POLL_INTERVAL);
     connect(mMousePollTimer, SIGNAL(timeout()),
         SLOT(updateMouseOverOpacity()));
+}
+
+void NotificationWidget::updateTextLabel()
+{
+    QString text;
+    if (!mSummary.isEmpty()) {
+        text = "<b>" + mSummary + "</b>";
+    }
+    if (!mBody.isEmpty()) {
+        if (!mSummary.isEmpty()) {
+            text += "<br/>";
+        }
+        text += mBody;
+    }
+    mTextLabel->setText(text);
+}
+
+void NotificationWidget::setBody(const QString& body)
+{
+    mBody = body;
+    updateTextLabel();
+    adjustSize();
+    fadeIn();
 }
 
 void NotificationWidget::setInputMask()

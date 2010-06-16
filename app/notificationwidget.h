@@ -47,13 +47,20 @@ class NotificationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    NotificationWidget(uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
+    NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
 
     void fadeIn();
 
     void setAlignment(Qt::Alignment);
 
     uint id() const { return mId; }
+
+    QString appName() const { return mAppName; }
+
+    QString summary() const { return mSummary; }
+
+    QString body() const { return mBody; }
+    void setBody(const QString&);
 
     // Not named close() to avoid confusion with QWidget::close()
     void closeWidget();
@@ -72,7 +79,13 @@ private Q_SLOTS:
     void updateMouseOverOpacity();
 
 private:
+    QString mAppName;
     uint mId;
+    QString mSummary;
+    QString mBody;
+
+    QLabel* mTextLabel;
+
     uint mCloseReason;
     Qt::Alignment mAlignment;
     Plasma::FrameSvg* mBackground;
@@ -92,6 +105,7 @@ private:
 
     void setInputMask();
     void startLifeTimer();
+    void updateTextLabel();
 };
 
 } // namespace

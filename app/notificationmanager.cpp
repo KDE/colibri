@@ -149,6 +149,12 @@ static QString findImageForSpecImagePath(const QString &_path)
 
 uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int timeout)
 {
+    NotificationWidget* widget = findWidget(appName, summary);
+    if (widget) {
+        widget->setBody(widget->body() + "<br>" + body);
+        return widget->id();
+    }
+
     QPixmap pix;
 
     // image
@@ -186,7 +192,7 @@ uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, co
     uint id = mNextId++;
 
     // Create widget
-    NotificationWidget* widget = new NotificationWidget(id, image, appIcon, summary, body, timeout);
+    widget = new NotificationWidget(appName, id, image, appIcon, summary, body, timeout);
 
     // Update config, KCM may have changed it
     mConfig->readConfig();
@@ -242,6 +248,16 @@ void NotificationManager::slotNotificationWidgetClosed(uint id, uint reason)
     if (!mWidgets.isEmpty()) {
         mWidgets.first()->fadeIn();
     }
+}
+
+NotificationWidget* NotificationManager::findWidget(const QString& appName, const QString& summary)
+{
+    Q_FOREACH(NotificationWidget* widget, mWidgets) {
+        if (widget->appName() == appName && widget->summary() == summary) {
+            return widget;
+        }
+    }
+    return 0;
 }
 
 } // namespace
