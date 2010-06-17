@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QLabel>
 #include <QPainter>
 #include <QPropertyAnimation>
-#include <QSequentialAnimationGroup>
+#include <QTimeLine>
 #include <QTimer>
 #include <QX11Info>
 
@@ -75,34 +75,139 @@ static const qreal MOUSE_OVER_OPACITY_MIN = .4;
 // the widget will be hidden (should not be less than MOUSE_OVER_OPACITY_MIN!)
 static const qreal NON_COMPOSITED_OPACITY_THRESHOLD = .4;
 
+
+////////////////////////////////////////////////////:
+// State
+////////////////////////////////////////////////////:
+State::State(NotificationWidget* widget)
+: mNotificationWidget(widget)
+{}
+
+void State::switchToState(State* state)
+{
+    mNotificationWidget->mState = state;
+    deleteLater();
+}
+
+////////////////////////////////////////////////////:
+// HiddenState
+////////////////////////////////////////////////////:
+class HiddenState : public State
+{
+public:
+    HiddenState(NotificationWidget* widget) : State(widget) {}
+
+    void onStarted()
+    {
+        switchToState(new FadeInState(mNotificationWidget));
+    }
+};
+
+
+////////////////////////////////////////////////////:
+// FadeInState
+////////////////////////////////////////////////////:
+FadeInState::FadeInState(NotificationWidget* widget)
+: State(widget)
+{
+    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity");
+    anim->setDuration(DEFAULT_FADE_IN_TIMEOUT);
+    // FIXME: Adjust duration according to current opacity
+    anim->setStartValue(mNotificationWidget->fadeOpacity());
+    anim->setEndValue(1.);
+    connect(anim, SIGNAL(finished()), SLOT(slotFinished()));
+    anim->start();
+}
+
+void FadeInState::onAppended()
+{
+    // Grow
+}
+
+void FadeInState::slotFinished()
+{
+    switchToState(new VisibleState(mNotificationWidget));
+}
+
+
+////////////////////////////////////////////////////:
+// VisibleState
+////////////////////////////////////////////////////:
+VisibleState::VisibleState(NotificationWidget* widget)
+: State(widget)
+, mTimeLine(new QTimeLine(mNotificationWidget->timeout(), this))
+{
+    connect(mTimeLine, SIGNAL(finished()), SLOT(slotFinished()));
+    mTimeLine->start();
+}
+
+void VisibleState::onAppended()
+{
+    // Grow
+    mTimeLine->setDuration(mNotificationWidget->timeout());
+}
+
+void VisibleState::slotFinished()
+{
+    switchToState(new FadeOutState(mNotificationWidget));
+}
+
+void VisibleState::onMouseOver()
+{
+    mTimeLine->setPaused(true);
+}
+
+void VisibleState::onMouseLeave()
+{
+    mTimeLine->setPaused(false);
+}
+
+////////////////////////////////////////////////////:
+// FadeOutState
+////////////////////////////////////////////////////:
+FadeOutState::FadeOutState(NotificationWidget* widget)
+: State(widget)
+{
+    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity");
+    anim->setDuration(DEFAULT_FADE_OUT_TIMEOUT);
+    anim->setStartValue(1.);
+    anim->setEndValue(0.);
+    connect(anim, SIGNAL(finished()), SLOT(slotFinished()));
+    anim->start();
+}
+
+void FadeOutState::onAppended()
+{
+    // FIXME: Grow
+    // FIXME: Should take into account the fact that existing text as already
+    // been read
+    switchToState(new FadeInState(mNotificationWidget));
+}
+
+void FadeOutState::slotFinished()
+{
+    mNotificationWidget->emitClosed();
+}
+
+
+////////////////////////////////////////////////////:
+// NotificationWidget
+////////////////////////////////////////////////////:
 NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
 : mAppName(appName)
 , mId(id)
 , mSummary(summary)
 , mBody(body)
+, mTimeout(timeout <= 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout)
 , mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mBackground(new Plasma::FrameSvg(this))
-, mAnimation(new QSequentialAnimationGroup(this))
+, mState(new HiddenState(this))
 , mMousePollTimer(new QTimer(this))
 , mFadeOpacity(1.)
 , mMouseOverOpacity(1.)
 {
-    QPropertyAnimation* fadeInAnim = new QPropertyAnimation(this, "fadeOpacity");
-    fadeInAnim->setDuration(DEFAULT_FADE_IN_TIMEOUT);
-    fadeInAnim->setStartValue(0.);
-    fadeInAnim->setEndValue(1.);
-
-    QPropertyAnimation* fadeOutAnim = new QPropertyAnimation(this, "fadeOpacity");
-    fadeOutAnim->setDuration(DEFAULT_FADE_OUT_TIMEOUT);
-    fadeOutAnim->setStartValue(1.);
-    fadeOutAnim->setEndValue(0.);
-
-    mAnimation->addAnimation(fadeInAnim);
-    mAnimation->addPause(timeout == 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout);
-    mAnimation->addAnimation(fadeOutAnim);
-
     // Icon
     QPixmap pix;
     if (!image_.isNull()) {
@@ -167,8 +272,6 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     layout->addWidget(mTextLabel);
 
     // Behavior
-    connect(mAnimation, SIGNAL(finished()),
-        SLOT(slotAnimationFinished()));
     setWindowOpacity(0);
 
     mMousePollTimer->setInterval(MOUSE_POLL_INTERVAL);
@@ -191,11 +294,16 @@ void NotificationWidget::updateTextLabel()
     mTextLabel->setText(text);
 }
 
-void NotificationWidget::appendToBody(const QString& body)
+void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
     mBody += "<br>" + body;
+    if (timeout <= 0) {
+        timeout = DEFAULT_ON_SCREEN_TIMEOUT;
+    }
+    mTimeout += timeout;
     updateTextLabel();
-    fadeIn();
+    adjustSizeAndPosition();
+    mState->onAppended();
 }
 
 void NotificationWidget::setInputMask()
@@ -227,10 +335,19 @@ void NotificationWidget::setAlignment(Qt::Alignment alignment)
 void NotificationWidget::closeWidget()
 {
     mCloseReason = CLOSE_REASON_CLOSED_BY_APP;
-    fadeOut();
+    emitClosed();
 }
 
-void NotificationWidget::fadeIn()
+void NotificationWidget::start()
+{
+    adjustSizeAndPosition();
+    show();
+    mMousePollTimer->start();
+    mState->onStarted();
+}
+
+
+void NotificationWidget::adjustSizeAndPosition()
 {
     adjustSize();
     setInputMask();
@@ -252,16 +369,6 @@ void NotificationWidget::fadeIn()
         left = rect.right() - width();
     }
     move(left, top);
-    show();
-    mAnimation->start();
-    mMousePollTimer->start();
-}
-
-void NotificationWidget::fadeOut()
-{
-    // Go to fadeout directly if we were not already there
-    mAnimation->removeAnimation(mAnimation->animationAt(0));
-    mAnimation->removeAnimation(mAnimation->animationAt(1));
 }
 
 void NotificationWidget::paintEvent(QPaintEvent*)
@@ -332,9 +439,9 @@ void NotificationWidget::updateMouseOverOpacity()
     bool wasOver = oldOpacity < 1.;
     bool isOver = mMouseOverOpacity < 1.;
     if (!wasOver && isOver) {
-        mAnimation->pause();
+        mState->onMouseOver();
     } else if (wasOver && !isOver) {
-        mAnimation->resume();
+        mState->onMouseLeave();
     }
 
     if (!qFuzzyCompare(mMouseOverOpacity, oldOpacity)) {
@@ -342,7 +449,7 @@ void NotificationWidget::updateMouseOverOpacity()
     }
 }
 
-void NotificationWidget::slotAnimationFinished()
+void NotificationWidget::emitClosed()
 {
     emit closed(mId, mCloseReason);
 }

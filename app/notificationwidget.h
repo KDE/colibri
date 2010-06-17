@@ -26,9 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QWidget>
 
 class QLabel;
-class QSequentialAnimationGroup;
+class QTimeLine;
 class QTimer;
-class QWidget;
 
 namespace Plasma
 {
@@ -38,7 +37,57 @@ class FrameSvg;
 namespace Colibri
 {
 
-class Notification;
+class NotificationWidget;
+
+class State : public QObject
+{
+Q_OBJECT
+public:
+    State(NotificationWidget*);
+
+    virtual void onStarted() {}
+    virtual void onAppended() {}
+    virtual void onMouseOver() {}
+    virtual void onMouseLeave() {}
+
+protected:
+    void switchToState(State*);
+    NotificationWidget* mNotificationWidget;
+};
+
+class FadeInState : public State
+{
+Q_OBJECT
+public:
+    FadeInState(NotificationWidget* widget);
+    virtual void onAppended();
+private Q_SLOTS:
+    void slotFinished();
+};
+
+class VisibleState : public State
+{
+Q_OBJECT
+public:
+    VisibleState(NotificationWidget* widget);
+    virtual void onAppended();
+    virtual void onMouseOver();
+    virtual void onMouseLeave();
+private Q_SLOTS:
+    void slotFinished();
+private:
+    QTimeLine* mTimeLine;
+};
+
+class FadeOutState : public State
+{
+Q_OBJECT
+public:
+    FadeOutState(NotificationWidget* widget);
+    virtual void onAppended();
+private Q_SLOTS:
+    void slotFinished();
+};
 
 /**
  * A widget which shows an notification
@@ -51,7 +100,7 @@ public:
 
     Q_PROPERTY(qreal fadeOpacity READ fadeOpacity WRITE setFadeOpacity)
 
-    void fadeIn();
+    void start();
 
     void setAlignment(Qt::Alignment);
 
@@ -61,13 +110,17 @@ public:
 
     QString summary() const { return mSummary; }
 
-    void appendToBody(const QString&);
+    int timeout() const { return mTimeout; }
+
+    void appendToBody(const QString&, int timeout);
 
     // Not named close() to avoid confusion with QWidget::close()
     void closeWidget();
 
     qreal fadeOpacity() const;
     void setFadeOpacity(qreal);
+
+    void emitClosed();
 
 Q_SIGNALS:
     void closed(uint id, uint reason);
@@ -77,9 +130,7 @@ protected:
     virtual void resizeEvent(QResizeEvent*);
 
 private Q_SLOTS:
-    void fadeOut();
     void updateOpacity();
-    void slotAnimationFinished();
     void updateMouseOverOpacity();
 
 private:
@@ -87,6 +138,7 @@ private:
     uint mId;
     QString mSummary;
     QString mBody;
+    int mTimeout;
 
     QLabel* mTextLabel;
 
@@ -94,7 +146,7 @@ private:
     Qt::Alignment mAlignment;
     Plasma::FrameSvg* mBackground;
 
-    QSequentialAnimationGroup* mAnimation;
+    State* mState;
 
     QTimer* mMousePollTimer;
 
@@ -103,6 +155,9 @@ private:
 
     void setInputMask();
     void updateTextLabel();
+    void adjustSizeAndPosition();
+
+    friend class State;
 };
 
 } // namespace

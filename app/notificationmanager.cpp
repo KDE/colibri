@@ -151,7 +151,7 @@ uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, co
 {
     NotificationWidget* widget = findWidget(appName, summary);
     if (widget && !body.isEmpty()) {
-        widget->appendToBody(body);
+        widget->appendToBody(body, timeout);
         return widget->id();
     }
 
@@ -200,7 +200,7 @@ uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, co
     connect(widget, SIGNAL(closed(uint, uint)), SLOT(slotNotificationWidgetClosed(uint, uint)));
     mWidgets << widget;
     if (mWidgets.size() == 1) {
-        widget->fadeIn();
+        widget->start();
     }
     kDebug() << "id:" << id << "app:" << appName << "summary:" << summary << "body:" << body;
     return id;
@@ -246,7 +246,7 @@ void NotificationManager::slotNotificationWidgetClosed(uint id, uint reason)
     widget->deleteLater();
 
     if (!mWidgets.isEmpty()) {
-        mWidgets.first()->fadeIn();
+        mWidgets.first()->start();
     }
 }
 
