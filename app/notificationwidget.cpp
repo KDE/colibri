@@ -191,9 +191,9 @@ void NotificationWidget::updateTextLabel()
     mTextLabel->setText(text);
 }
 
-void NotificationWidget::setBody(const QString& body)
+void NotificationWidget::appendToBody(const QString& body)
 {
-    mBody = body;
+    mBody += "<br>" + body;
     updateTextLabel();
     fadeIn();
 }

@@ -150,8 +150,8 @@ static QString findImageForSpecImagePath(const QString &_path)
 uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int timeout)
 {
     NotificationWidget* widget = findWidget(appName, summary);
-    if (widget) {
-        widget->setBody(widget->body() + "<br>" + body);
+    if (widget && !body.isEmpty()) {
+        widget->appendToBody(body);
         return widget->id();
     }
 

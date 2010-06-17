@@ -61,8 +61,7 @@ public:
 
     QString summary() const { return mSummary; }
 
-    QString body() const { return mBody; }
-    void setBody(const QString&);
+    void appendToBody(const QString&);
 
     // Not named close() to avoid confusion with QWidget::close()
     void closeWidget();
