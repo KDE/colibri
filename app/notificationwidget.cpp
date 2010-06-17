@@ -36,7 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
-#include <QTimeLine>
+#include <QPropertyAnimation>
+#include <QSequentialAnimationGroup>
 #include <QTimer>
 #include <QX11Info>
 
@@ -83,15 +84,24 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mBackground(new Plasma::FrameSvg(this))
-, mLifeTimeLine(new QTimeLine(DEFAULT_ON_SCREEN_TIMEOUT, this))
-, mFadeTimeLine(new QTimeLine(1000, this))
+, mAnimation(new QSequentialAnimationGroup(this))
 , mMousePollTimer(new QTimer(this))
+, mFadeOpacity(1.)
 , mMouseOverOpacity(1.)
 {
-    // Timeout
-    mLifeTimeLine->setDuration(timeout == 0
-                                ? DEFAULT_ON_SCREEN_TIMEOUT
-                                : timeout);
+    QPropertyAnimation* fadeInAnim = new QPropertyAnimation(this, "fadeOpacity");
+    fadeInAnim->setDuration(DEFAULT_FADE_IN_TIMEOUT);
+    fadeInAnim->setStartValue(0.);
+    fadeInAnim->setEndValue(1.);
+
+    QPropertyAnimation* fadeOutAnim = new QPropertyAnimation(this, "fadeOpacity");
+    fadeOutAnim->setDuration(DEFAULT_FADE_OUT_TIMEOUT);
+    fadeOutAnim->setStartValue(1.);
+    fadeOutAnim->setEndValue(0.);
+
+    mAnimation->addAnimation(fadeInAnim);
+    mAnimation->addPause(timeout == 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout);
+    mAnimation->addAnimation(fadeOutAnim);
 
     // Icon
     QPixmap pix;
@@ -157,13 +167,8 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     layout->addWidget(mTextLabel);
 
     // Behavior
-    connect(mLifeTimeLine, SIGNAL(finished()), SLOT(fadeOut()));
-
-    mFadeTimeLine->setCurveShape(QTimeLine::LinearCurve);
-    connect(mFadeTimeLine, SIGNAL(valueChanged(qreal)),
-        SLOT(updateOpacity()));
-    connect(mFadeTimeLine, SIGNAL(finished()),
-        SLOT(slotFadeTimeLineFinished()));
+    connect(mAnimation, SIGNAL(finished()),
+        SLOT(slotAnimationFinished()));
     setWindowOpacity(0);
 
     mMousePollTimer->setInterval(MOUSE_POLL_INTERVAL);
@@ -190,7 +195,6 @@ void NotificationWidget::setBody(const QString& body)
 {
     mBody = body;
     updateTextLabel();
-    adjustSize();
     fadeIn();
 }
 
@@ -222,7 +226,6 @@ void NotificationWidget::setAlignment(Qt::Alignment alignment)
 
 void NotificationWidget::closeWidget()
 {
-    mLifeTimeLine->stop();
     mCloseReason = CLOSE_REASON_CLOSED_BY_APP;
     fadeOut();
 }
@@ -250,37 +253,15 @@ void NotificationWidget::fadeIn()
     }
     move(left, top);
     show();
-    mFadeTimeLine->setDirection(QTimeLine::Forward);
-    mFadeTimeLine->setDuration(DEFAULT_FADE_IN_TIMEOUT);
-    mFadeTimeLine->start();
-
+    mAnimation->start();
     mMousePollTimer->start();
 }
 
 void NotificationWidget::fadeOut()
 {
-    if (mFadeTimeLine->direction() == QTimeLine::Backward) {
-        return;
-    }
-    mFadeTimeLine->setDirection(QTimeLine::Backward);
-    mFadeTimeLine->setDuration(DEFAULT_FADE_OUT_TIMEOUT);
-    mFadeTimeLine->setCurrentTime(mFadeTimeLine->duration());
-    mFadeTimeLine->start();
-}
-
-void NotificationWidget::startLifeTimer()
-{
-    switch (mLifeTimeLine->state()) {
-    case QTimeLine::Paused:
-        mLifeTimeLine->setPaused(false);
-        break;
-    case QTimeLine::NotRunning:
-        mLifeTimeLine->start();
-        break;
-    case QTimeLine::Running:
-        kWarning() << "mLifeTimeLine is already running!";
-        break;
-    }
+    // Go to fadeout directly if we were not already there
+    mAnimation->removeAnimation(mAnimation->animationAt(0));
+    mAnimation->removeAnimation(mAnimation->animationAt(1));
 }
 
 void NotificationWidget::paintEvent(QPaintEvent*)
@@ -298,12 +279,23 @@ void NotificationWidget::resizeEvent(QResizeEvent*)
 
 void NotificationWidget::updateOpacity()
 {
-    const qreal opacity = mFadeTimeLine->currentValue() * mMouseOverOpacity;
+    const qreal opacity = mFadeOpacity * mMouseOverOpacity;
     if (KWindowSystem::compositingActive()) {
         setWindowOpacity(opacity);
     } else {
         setVisible(opacity > NON_COMPOSITED_OPACITY_THRESHOLD);
     }
+}
+
+qreal NotificationWidget::fadeOpacity() const
+{
+    return mFadeOpacity;
+}
+
+void NotificationWidget::setFadeOpacity(qreal value)
+{
+    mFadeOpacity = value;
+    updateOpacity();
 }
 
 static inline int distance(int value, int min, int max)
@@ -340,9 +332,9 @@ void NotificationWidget::updateMouseOverOpacity()
     bool wasOver = oldOpacity < 1.;
     bool isOver = mMouseOverOpacity < 1.;
     if (!wasOver && isOver) {
-        mLifeTimeLine->setPaused(true);
+        mAnimation->pause();
     } else if (wasOver && !isOver) {
-        mLifeTimeLine->setPaused(false);
+        mAnimation->resume();
     }
 
     if (!qFuzzyCompare(mMouseOverOpacity, oldOpacity)) {
@@ -350,13 +342,9 @@ void NotificationWidget::updateMouseOverOpacity()
     }
 }
 
-void NotificationWidget::slotFadeTimeLineFinished()
+void NotificationWidget::slotAnimationFinished()
 {
-    if (mFadeTimeLine->direction() == QTimeLine::Forward) {
-        startLifeTimer();
-    } else {
-        emit closed(mId, mCloseReason);
-    }
+    emit closed(mId, mCloseReason);
 }
 
 } // namespace

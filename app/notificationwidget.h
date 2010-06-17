@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QWidget>
 
 class QLabel;
-class QTimeLine;
+class QSequentialAnimationGroup;
 class QTimer;
 class QWidget;
 
@@ -49,6 +49,8 @@ class NotificationWidget : public QWidget
 public:
     NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
 
+    Q_PROPERTY(qreal fadeOpacity READ fadeOpacity WRITE setFadeOpacity)
+
     void fadeIn();
 
     void setAlignment(Qt::Alignment);
@@ -65,6 +67,9 @@ public:
     // Not named close() to avoid confusion with QWidget::close()
     void closeWidget();
 
+    qreal fadeOpacity() const;
+    void setFadeOpacity(qreal);
+
 Q_SIGNALS:
     void closed(uint id, uint reason);
 
@@ -75,7 +80,7 @@ protected:
 private Q_SLOTS:
     void fadeOut();
     void updateOpacity();
-    void slotFadeTimeLineFinished();
+    void slotAnimationFinished();
     void updateMouseOverOpacity();
 
 private:
@@ -90,21 +95,14 @@ private:
     Qt::Alignment mAlignment;
     Plasma::FrameSvg* mBackground;
 
-    // This timeline is used as a QTimer to handle the bubble appearance
-    // duration.  It starts when initial fade in is done and ends when final
-    // fade out starts.  We use a QTimeLine instead of QTimer because a
-    // QTimeLine can be paused and resumed.
-    QTimeLine* mLifeTimeLine;
-
-    // This timeline handles the fade in/out animation
-    QTimeLine* mFadeTimeLine;
+    QSequentialAnimationGroup* mAnimation;
 
     QTimer* mMousePollTimer;
 
+    qreal mFadeOpacity;
     qreal mMouseOverOpacity;
 
     void setInputMask();
-    void startLifeTimer();
     void updateTextLabel();
 };
 
