@@ -158,7 +158,7 @@ uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, co
 {
     // Can we append to an existing notification?
     NotificationWidget* widget = findWidget(appName, summary);
-    if (widget && !body.isEmpty()) {
+    if (widget && widget->summary() == summary && !body.isEmpty()) {
         int timeout = timeoutForText(body);
         widget->appendToBody(body, timeout);
         return widget->id();
