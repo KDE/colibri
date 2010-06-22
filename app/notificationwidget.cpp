@@ -60,7 +60,6 @@ static const uint CLOSE_REASON_CLOSED_BY_APP  = 3;
 static const int DEFAULT_BUBBLE_MIN_HEIGHT = 50;
 static const int DEFAULT_FADE_IN_TIMEOUT   = 250;
 static const int DEFAULT_FADE_OUT_TIMEOUT  = 1000;
-static const int DEFAULT_ON_SCREEN_TIMEOUT = 3000; //10000;
 
 static const int GROW_ANIMATION_DURATION = 200;
 
@@ -186,7 +185,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mId(id)
 , mSummary(summary)
 , mBody(body)
-, mVisibleTimeLine(new QTimeLine(timeout <= 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout, this))
+, mVisibleTimeLine(new QTimeLine(timeout, this))
 , mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
@@ -284,9 +283,6 @@ void NotificationWidget::updateTextLabel()
 void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
     mBody += "<br>" + body;
-    if (timeout <= 0) {
-        timeout = DEFAULT_ON_SCREEN_TIMEOUT;
-    }
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
     mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));

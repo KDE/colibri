@@ -147,10 +147,19 @@ static QString findImageForSpecImagePath(const QString &_path)
                                            true /* canReturnNull */);
 }
 
-uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int timeout)
+static int timeoutForText(const QString& text)
 {
+    const int AVERAGE_WORD_LENGTH = 6;
+    const int WORD_PER_MINUTE = 250;
+    return 60000 * text.length() / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
+}
+
+uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int /*timeout*/)
+{
+    // Can we append to an existing notification?
     NotificationWidget* widget = findWidget(appName, summary);
     if (widget && !body.isEmpty()) {
+        int timeout = timeoutForText(body);
         widget->appendToBody(body, timeout);
         return widget->id();
     }
@@ -176,17 +185,9 @@ uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, co
     }
 
     // timeout
-    if (timeout == -1) {
-        const int AVERAGE_WORD_LENGTH = 6;
-        const int WORD_PER_MINUTE = 250;
-        int count = summary.length() + body.length();
-        timeout = 60000 * count / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
-
-        // Add two seconds for the user to notice the notification, and ensure
-        // it last at least five seconds, otherwise all the user see is a
-        // flash
-        timeout = 2000 + qMin(timeout, 3000);
-    }
+    // Add two seconds for the user to notice the notification, and ensure it
+    // last at least five seconds, otherwise all the user sees is a flash
+    int timeout = 2000 + qMax(timeoutForText(summary + body), 3000);
 
     // Id
     uint id = mNextId++;
