@@ -110,7 +110,7 @@ public:
 
     QString summary() const { return mSummary; }
 
-    int timeout() const { return mTimeout; }
+    QTimeLine* visibleTimeLine() const { return mVisibleTimeLine; }
 
     void appendToBody(const QString&, int timeout);
 
@@ -138,7 +138,7 @@ private:
     uint mId;
     QString mSummary;
     QString mBody;
-    int mTimeout;
+    QTimeLine* mVisibleTimeLine;
 
     QLabel* mTextLabel;
 

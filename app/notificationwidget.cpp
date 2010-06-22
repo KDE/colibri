@@ -135,16 +135,16 @@ void FadeInState::slotFinished()
 ////////////////////////////////////////////////////:
 VisibleState::VisibleState(NotificationWidget* widget)
 : State(widget)
-, mTimeLine(new QTimeLine(mNotificationWidget->timeout(), this))
 {
-    connect(mTimeLine, SIGNAL(finished()), SLOT(slotFinished()));
-    mTimeLine->start();
+    connect(widget->visibleTimeLine(), SIGNAL(finished()), SLOT(slotFinished()));
+    if (widget->visibleTimeLine()->state() == QTimeLine::NotRunning) {
+        widget->visibleTimeLine()->start();
+    }
 }
 
 void VisibleState::onAppended()
 {
     // Grow
-    mTimeLine->setDuration(mNotificationWidget->timeout());
 }
 
 void VisibleState::slotFinished()
@@ -154,12 +154,12 @@ void VisibleState::slotFinished()
 
 void VisibleState::onMouseOver()
 {
-    mTimeLine->setPaused(true);
+    mNotificationWidget->visibleTimeLine()->setPaused(true);
 }
 
 void VisibleState::onMouseLeave()
 {
-    mTimeLine->setPaused(false);
+    mNotificationWidget->visibleTimeLine()->setPaused(false);
 }
 
 ////////////////////////////////////////////////////:
@@ -179,8 +179,6 @@ FadeOutState::FadeOutState(NotificationWidget* widget)
 void FadeOutState::onAppended()
 {
     // FIXME: Grow
-    // FIXME: Should take into account the fact that existing text as already
-    // been read
     switchToState(new FadeInState(mNotificationWidget));
 }
 
@@ -198,7 +196,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mId(id)
 , mSummary(summary)
 , mBody(body)
-, mTimeout(timeout <= 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout)
+, mVisibleTimeLine(new QTimeLine(timeout <= 0 ? DEFAULT_ON_SCREEN_TIMEOUT : timeout, this))
 , mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
@@ -300,7 +298,7 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
     if (timeout <= 0) {
         timeout = DEFAULT_ON_SCREEN_TIMEOUT;
     }
-    mTimeout += timeout;
+    mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
     adjustSizeAndPosition();
     mState->onAppended();
