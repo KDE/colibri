@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #ifndef NOTIFICATIONWIDGET_H
 #define NOTIFICATIONWIDGET_H
 
+#include <QPropertyAnimation>
+#include <QScopedPointer>
 #include <QWidget>
 
 class QLabel;
@@ -60,7 +62,6 @@ class FadeInState : public State
 Q_OBJECT
 public:
     FadeInState(NotificationWidget* widget);
-    virtual void onAppended();
 private Q_SLOTS:
     void slotFinished();
 };
@@ -70,7 +71,6 @@ class VisibleState : public State
 Q_OBJECT
 public:
     VisibleState(NotificationWidget* widget);
-    virtual void onAppended();
     virtual void onMouseOver();
     virtual void onMouseLeave();
 private Q_SLOTS:
@@ -152,10 +152,12 @@ private:
 
     qreal mFadeOpacity;
     qreal mMouseOverOpacity;
+    QScopedPointer<QPropertyAnimation> mGrowAnimation;
 
     void setInputMask();
     void updateTextLabel();
     void adjustSizeAndPosition();
+    QRect idealGeometry() const;
 
     friend class State;
 };

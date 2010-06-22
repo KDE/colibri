@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
-#include <QPropertyAnimation>
 #include <QTimeLine>
 #include <QTimer>
 #include <QX11Info>
@@ -62,6 +61,8 @@ static const int DEFAULT_BUBBLE_MIN_HEIGHT = 50;
 static const int DEFAULT_FADE_IN_TIMEOUT   = 250;
 static const int DEFAULT_FADE_OUT_TIMEOUT  = 1000;
 static const int DEFAULT_ON_SCREEN_TIMEOUT = 3000; //10000;
+
+static const int GROW_ANIMATION_DURATION = 200;
 
 static const int ICON_SIZE = KIconLoader::SizeMedium;
 
@@ -119,11 +120,6 @@ FadeInState::FadeInState(NotificationWidget* widget)
     anim->start();
 }
 
-void FadeInState::onAppended()
-{
-    // Grow
-}
-
 void FadeInState::slotFinished()
 {
     switchToState(new VisibleState(mNotificationWidget));
@@ -140,11 +136,6 @@ VisibleState::VisibleState(NotificationWidget* widget)
     if (widget->visibleTimeLine()->state() == QTimeLine::NotRunning) {
         widget->visibleTimeLine()->start();
     }
-}
-
-void VisibleState::onAppended()
-{
-    // Grow
 }
 
 void VisibleState::slotFinished()
@@ -178,7 +169,6 @@ FadeOutState::FadeOutState(NotificationWidget* widget)
 
 void FadeOutState::onAppended()
 {
-    // FIXME: Grow
     switchToState(new FadeInState(mNotificationWidget));
 }
 
@@ -254,9 +244,8 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mTextLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
 
     int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
-    mTextLabel->setFixedWidth(30 * averageCharWidth);
+    mTextLabel->setFixedWidth(27 * averageCharWidth);
     updateTextLabel();
-    adjustSize();
 
     QPalette palette = mTextLabel->palette();
     palette.setColor(QPalette::WindowText, theme->color(Plasma::Theme::TextColor));
@@ -300,7 +289,11 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
     }
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
-    adjustSizeAndPosition();
+    mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
+    mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
+    mGrowAnimation->setStartValue(geometry());
+    mGrowAnimation->setEndValue(idealGeometry());
+    mGrowAnimation->start();
     mState->onAppended();
 }
 
@@ -338,35 +331,34 @@ void NotificationWidget::closeWidget()
 
 void NotificationWidget::start()
 {
-    adjustSizeAndPosition();
+    setInputMask();
+    setGeometry(idealGeometry());
     show();
     mMousePollTimer->start();
     mState->onStarted();
 }
 
-
-void NotificationWidget::adjustSizeAndPosition()
+QRect NotificationWidget::idealGeometry() const
 {
-    adjustSize();
-    setInputMask();
-
+    QSize sh = minimumSizeHint();
     QRect rect = QApplication::desktop()->availableGeometry(QCursor::pos());
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
     } else if (mAlignment & Qt::AlignVCenter) {
-        top = rect.top() + (rect.height() - height()) / 2;
+        top = rect.top() + (rect.height() - sh.height()) / 2;
     } else {
-        top = rect.bottom() - height();
+        top = rect.bottom() - sh.height();
     }
     if (mAlignment & Qt::AlignLeft) {
         left = rect.left();
     } else if (mAlignment & Qt::AlignHCenter) {
-        left = rect.left() + (rect.width() - width()) / 2;
+        left = rect.left() + (rect.width() - sh.width()) / 2;
     } else {
-        left = rect.right() - width();
+        left = rect.right() - sh.width();
     }
-    move(left, top);
+
+    return QRect(QPoint(left, top), sh);
 }
 
 void NotificationWidget::paintEvent(QPaintEvent*)
