@@ -176,6 +176,24 @@ void FadeOutState::slotFinished()
     mNotificationWidget->emitClosed();
 }
 
+static QString cleanBody(const QString& _body)
+{
+    QString body = _body;
+    if (body.startsWith("<qt>", Qt::CaseInsensitive)) {
+        body = body.mid(4);
+    } else if (body.startsWith("<html>", Qt::CaseInsensitive)) {
+        body = body.mid(6);
+    }
+    if (body.endsWith("</qt>", Qt::CaseInsensitive)) {
+        body.chop(5);
+    } else if (body.endsWith("</html>", Qt::CaseInsensitive)) {
+        body.chop(6);
+    }
+    if (body.isEmpty()) {
+        return QString();
+    }
+    return "<div>" + body + "</div>";
+}
 
 ////////////////////////////////////////////////////:
 // NotificationWidget
@@ -184,7 +202,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 : mAppName(appName)
 , mId(id)
 , mSummary(summary)
-, mBody(body)
+, mBody(cleanBody(body))
 , mVisibleTimeLine(new QTimeLine(timeout, this))
 , mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
@@ -272,9 +290,6 @@ void NotificationWidget::updateTextLabel()
         text = "<b>" + mSummary + "</b>";
     }
     if (!mBody.isEmpty()) {
-        if (!mSummary.isEmpty()) {
-            text += "<br/>";
-        }
         text += mBody;
     }
     mTextLabel->setText(text);
@@ -282,7 +297,7 @@ void NotificationWidget::updateTextLabel()
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
-    mBody += "<br>" + body;
+    mBody += cleanBody(body);
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
     mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
