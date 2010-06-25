@@ -7,8 +7,6 @@ set(colibri_SRCS
     notificationwidget.cpp
 )
 
-dbus_add_activation_service(colibri-org.freedesktop.Notifications.service.in)
-
 qt4_add_dbus_adaptor(colibri_SRCS org.freedesktop.Notifications.xml
     notificationmanager.h Colibri::NotificationManager)
 
@@ -24,3 +22,7 @@ target_link_libraries(colibri
 )
 
 install(TARGETS colibri ${INSTALL_TARGETS_DEFAULT_ARGS})
+
+install(FILES colibri_autostart.desktop
+    DESTINATION ${AUTOSTART_INSTALL_DIR}
+)

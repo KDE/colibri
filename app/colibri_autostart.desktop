@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Colibri
+Exec=colibri
+Icon=notifications
+Type=Application
+Comment=Colibri autostart at login
+Terminal=false
+X-KDE-autostart-condition=colibrirc:General:AutoStart:true

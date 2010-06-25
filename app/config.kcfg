@@ -9,5 +9,8 @@
         <entry name="Alignment" type="Int">
             <default code="true">Qt::AlignRight | Qt::AlignTop</default>
         </entry>
+        <entry name="AutoStart" type="Bool">
+            <default>true</default>
+        </entry>
     </group>
 </kcfg>
