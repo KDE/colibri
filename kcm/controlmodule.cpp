@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include "controlmodule.moc"
 
 // Qt
+#include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QDBusServiceWatcher>
 #include <QDBusReply>
@@ -121,13 +122,19 @@ void ControlModule::updateUnmanagedWidgetChangeState()
 
 static QString getCurrentService()
 {
+    QDBusConnectionInterface* interface = QDBusConnection::sessionBus().interface();
+    if (!interface->isServiceRegistered(DBUS_SERVICE)) {
+        return QString();
+    }
     QDBusInterface iface(DBUS_SERVICE, DBUS_PATH, DBUS_INTERFACE);
     if (!iface.isValid()) {
+        kWarning() << "Invalid registered interface!";
         return QString();
     }
 
     QDBusReply<QString> reply = iface.call("GetServerInformation");
     if (!reply.isValid()) {
+        kWarning() << "Failed to get server information:" << reply.error().message();
         return QString();
     }
     return reply.value();
