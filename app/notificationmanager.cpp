@@ -154,8 +154,12 @@ static int timeoutForText(const QString& text)
     return 60000 * text.length() / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
 }
 
-uint NotificationManager::Notify(const QString& appName, uint /*replacesId*/, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int /*timeout*/)
+uint NotificationManager::Notify(const QString& appName, uint replacesId, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int /*timeout*/)
 {
+    if (replacesId > 0) {
+        CloseNotification(replacesId);
+    }
+
     // Can we append to an existing notification?
     NotificationWidget* widget = findWidget(appName, summary);
     if (widget && widget->summary() == summary && !body.isEmpty()) {
