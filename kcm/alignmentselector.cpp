@@ -79,7 +79,7 @@ AlignmentSelector::AlignmentSelector(QWidget* parent)
     QDesktopWidget* desktop = QApplication::desktop();
     QRect rect = desktop->availableGeometry(desktop->screenNumber(this));
     qreal ratio = qreal(rect.width()) / rect.height();
-    setFixedSize(300, 300 / ratio + baseHeight);
+    setFixedSize(250, 250 / ratio + baseHeight);
 
     QGridLayout* layout = new QGridLayout(this);
 
