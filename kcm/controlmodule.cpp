@@ -26,10 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QDBusInterface>
 #include <QDBusServiceWatcher>
 #include <QDBusReply>
+#include <QTimer>
 #include <QVBoxLayout>
 
 // KDE
 #include <KAboutData>
+#include <KColorScheme>
 #include <KPluginFactory>
 #include <KProcess>
 
@@ -153,21 +155,52 @@ void ControlModule::updateStateInformation()
     bool colibriIsRunning = false;
     if (service == "colibri") {
         icon = "dialog-ok";
-        text = i18n("Colibri is currently running.");
+        text = i18n("Colibri is running.");
         colibriIsRunning = true;
-    } else if (service.isEmpty()) {
-        icon = "dialog-warning";
-        text = i18n("No notification system is currently running.");
-        showStartButton = true;
     } else {
-        icon = "dialog-error";
-        text = i18n("The current notification system is %1. You must stop it to be able to start Colibri.", service);
+        icon = "dialog-warning";
+        if (service.isEmpty()) {
+            text = i18n("No notification system is running.");
+            showStartButton = true;
+        } else {
+            text = i18n("The current notification system is %1. You must stop it to be able to start Colibri.", service);
+        }
     }
-    mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(16, 16));
+
+    // Adjust palette
+    KColorScheme scheme(QPalette::Active, KColorScheme::Window);
+    QBrush bg = scheme.background(colibriIsRunning ? KColorScheme::PositiveBackground : KColorScheme::NegativeBackground);
+    QBrush fg = scheme.foreground(colibriIsRunning ? KColorScheme::PositiveText : KColorScheme::NegativeText);
+    mUi->stateContainer->setStyleSheet(
+        QString(".QFrame {"
+            "background-color: %1;"
+            "border-radius: 3px;"
+            "border: 1px solid %2;"
+            "}"
+            ".QLabel { color: %2; }"
+            )
+        .arg(bg.color().name())
+        .arg(fg.color().name())
+        );
+
+    mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(22));
     mUi->stateTextLabel->setText(text);
     mUi->startButton->setVisible(showStartButton);
     mUi->previewButton->setEnabled(colibriIsRunning);
     mUi->previewImpossibleLabel->setVisible(!colibriIsRunning);
+
+    // Hide the stateContainer if Colibri is running. If we come from a
+    // slot (ie, we came because the dbus service changed), hide it after a
+    // delay. If we come from the constructor, hide it immediatly.
+    if (colibriIsRunning) {
+        if (sender()) {
+            QTimer::singleShot(1000, mUi->stateContainer, SLOT(hide()));
+        } else {
+            mUi->stateContainer->hide();
+        }
+    } else {
+        mUi->stateContainer->show();
+    }
 }
 
 void ControlModule::startColibri()
