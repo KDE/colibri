@@ -50,10 +50,12 @@ private Q_SLOTS:
     void updateUnmanagedWidgetChangeState();
     void updateStateInformation();
     void startColibri();
+    void preview();
 
 private:
     Config* mConfig;
     Ui::ControlModule* mUi;
+    uint mLastPreviewId;
 };
 
 } // namespace

@@ -55,6 +55,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
 , mConfig(new Config)
 , mUi(new Ui::ControlModule)
+, mLastPreviewId(0)
 {
     KAboutData* about = new KAboutData(
         "colibri", 0, ki18n("Colibri"),
@@ -74,6 +75,9 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 
     connect(mUi->startButton, SIGNAL(clicked()),
         SLOT(startColibri()));
+
+    connect(mUi->previewButton, SIGNAL(clicked()),
+        SLOT(preview()));
 
     QDBusServiceWatcher* watcher = new QDBusServiceWatcher(DBUS_SERVICE, QDBusConnection::sessionBus());
     connect(watcher, SIGNAL(serviceOwnerChanged(const QString&, const QString&, const QString&)),
@@ -146,9 +150,11 @@ void ControlModule::updateStateInformation()
     QString icon;
     QString text;
     bool showStartButton = false;
+    bool colibriIsRunning = false;
     if (service == "colibri") {
         icon = "dialog-ok";
         text = i18n("Colibri is currently running.");
+        colibriIsRunning = true;
     } else if (service.isEmpty()) {
         icon = "dialog-warning";
         text = i18n("No notification system is currently running.");
@@ -160,11 +166,35 @@ void ControlModule::updateStateInformation()
     mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(16, 16));
     mUi->stateTextLabel->setText(text);
     mUi->startButton->setVisible(showStartButton);
+    mUi->previewButton->setEnabled(colibriIsRunning);
+    mUi->previewImpossibleLabel->setVisible(!colibriIsRunning);
 }
 
 void ControlModule::startColibri()
 {
     KProcess::startDetached("colibri");
+}
+
+void ControlModule::preview()
+{
+    save();
+
+    QDBusInterface iface(DBUS_SERVICE, DBUS_PATH, DBUS_INTERFACE);
+    QDBusReply<uint> reply = iface.call(
+        "Notify",
+        "kcmcolibri",                       // appname
+        mLastPreviewId,                     // replacesId
+        "preferences-desktop-notification", // appIcon
+        i18n("Preview"),                    // summary
+        i18n("This is a preview of a Colibri notification"),
+        QStringList(),                      // actions
+        QVariantMap(),                      // hints
+        -1                                  // timeout
+        );
+
+    if (reply.isValid()) {
+        mLastPreviewId = reply.value();
+    }
 }
 
 } // namespace
