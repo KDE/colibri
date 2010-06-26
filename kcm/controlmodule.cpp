@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // KDE
 #include <KAboutData>
 #include <KPluginFactory>
+#include <KProcess>
 
 // Local
 #include "alignmentselector.h"
@@ -69,6 +70,9 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 
     connect(mUi->alignmentSelector, SIGNAL(changed(Qt::Alignment)),
         SLOT(updateUnmanagedWidgetChangeState()));
+
+    connect(mUi->startButton, SIGNAL(clicked()),
+        SLOT(startColibri()));
 
     QDBusServiceWatcher* watcher = new QDBusServiceWatcher(DBUS_SERVICE, QDBusConnection::sessionBus());
     connect(watcher, SIGNAL(serviceOwnerChanged(const QString&, const QString&, const QString&)),
@@ -134,18 +138,26 @@ void ControlModule::updateStateInformation()
     QString service = getCurrentService();
     QString icon;
     QString text;
+    bool showStartButton = false;
     if (service == "colibri") {
         icon = "dialog-ok";
         text = i18n("Colibri is currently running.");
     } else if (service.isEmpty()) {
         icon = "dialog-warning";
         text = i18n("No notification system is currently running.");
+        showStartButton = true;
     } else {
         icon = "dialog-error";
-        text = i18n("The current notification system is %1.", service);
+        text = i18n("The current notification system is %1. You must stop it to be able to start Colibri.", service);
     }
     mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(16, 16));
     mUi->stateTextLabel->setText(text);
+    mUi->startButton->setVisible(showStartButton);
+}
+
+void ControlModule::startColibri()
+{
+    KProcess::startDetached("colibri");
 }
 
 } // namespace

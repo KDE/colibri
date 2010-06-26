@@ -49,6 +49,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void updateUnmanagedWidgetChangeState();
     void updateStateInformation();
+    void startColibri();
 
 private:
     Config* mConfig;
