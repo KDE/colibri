@@ -48,6 +48,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void updateUnmanagedWidgetChangeState();
+    void updateStateInformation();
 
 private:
     Config* mConfig;

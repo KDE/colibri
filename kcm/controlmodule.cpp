@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include "controlmodule.moc"
 
 // Qt
+#include <QDBusInterface>
+#include <QDBusServiceWatcher>
+#include <QDBusReply>
 #include <QVBoxLayout>
 
 // KDE
@@ -35,6 +38,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
 static const char* VERSION = "0.1.0";
+
+static const char* DBUS_INTERFACE = "org.freedesktop.Notifications";
+static const char* DBUS_SERVICE = "org.freedesktop.Notifications";
+static const char* DBUS_PATH = "/org/freedesktop/Notifications";
 
 K_PLUGIN_FACTORY(ColibriModuleFactory, registerPlugin<Colibri::ControlModule>();)
 K_EXPORT_PLUGIN(ColibriModuleFactory("kcmcolibri"))
@@ -58,8 +65,16 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 
     mUi->setupUi(this);
 
+    addConfig(mConfig, this);
+
     connect(mUi->alignmentSelector, SIGNAL(changed(Qt::Alignment)),
         SLOT(updateUnmanagedWidgetChangeState()));
+
+    QDBusServiceWatcher* watcher = new QDBusServiceWatcher(DBUS_SERVICE, QDBusConnection::sessionBus());
+    connect(watcher, SIGNAL(serviceOwnerChanged(const QString&, const QString&, const QString&)),
+        SLOT(updateStateInformation()));
+
+    updateStateInformation();
 }
 
 ControlModule::~ControlModule()
@@ -98,6 +113,39 @@ void ControlModule::updateUnmanagedWidgetChangeState()
 {
     int alignment = int(mUi->alignmentSelector->alignment());
     unmanagedWidgetChangeState(alignment != mConfig->alignment());
+}
+
+static QString getCurrentService()
+{
+    QDBusInterface iface(DBUS_SERVICE, DBUS_PATH, DBUS_INTERFACE);
+    if (!iface.isValid()) {
+        return QString();
+    }
+
+    QDBusReply<QString> reply = iface.call("GetServerInformation");
+    if (!reply.isValid()) {
+        return QString();
+    }
+    return reply.value();
+}
+
+void ControlModule::updateStateInformation()
+{
+    QString service = getCurrentService();
+    QString icon;
+    QString text;
+    if (service == "colibri") {
+        icon = "dialog-ok";
+        text = i18n("Colibri is currently running.");
+    } else if (service.isEmpty()) {
+        icon = "dialog-warning";
+        text = i18n("No notification system is currently running.");
+    } else {
+        icon = "dialog-error";
+        text = i18n("The current notification system is %1.", service);
+    }
+    mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(16, 16));
+    mUi->stateTextLabel->setText(text);
 }
 
 } // namespace
