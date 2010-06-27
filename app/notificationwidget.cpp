@@ -352,6 +352,9 @@ void NotificationWidget::closeWidget()
 void NotificationWidget::start()
 {
     setInputMask();
+    if (mScreen == -1) {
+        mScreen = QApplication::desktop()->screenNumber(QCursor::pos());
+    }
     setGeometry(idealGeometry());
     show();
     mMousePollTimer->start();
@@ -361,12 +364,7 @@ void NotificationWidget::start()
 QRect NotificationWidget::idealGeometry() const
 {
     QSize sh = minimumSizeHint();
-    QRect rect;
-    if (mScreen == -1) {
-        rect = QApplication::desktop()->availableGeometry(QCursor::pos());
-    } else {
-        rect = QApplication::desktop()->availableGeometry(mScreen);
-    }
+    QRect rect = QApplication::desktop()->availableGeometry(mScreen);
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
