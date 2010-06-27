@@ -278,6 +278,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 
     // Behavior
     setWindowOpacity(0);
+    hide();
 
     mMousePollTimer->setInterval(MOUSE_POLL_INTERVAL);
     connect(mMousePollTimer, SIGNAL(timeout()),
@@ -301,11 +302,13 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
     mBody += cleanBody(body);
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
-    mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
-    mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
-    mGrowAnimation->setStartValue(geometry());
-    mGrowAnimation->setEndValue(idealGeometry());
-    mGrowAnimation->start();
+    if (isVisible()) {
+        mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
+        mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
+        mGrowAnimation->setStartValue(geometry());
+        mGrowAnimation->setEndValue(idealGeometry());
+        mGrowAnimation->start();
+    }
     mState->onAppended();
 }
 
