@@ -17,11 +17,6 @@ Colibri is licensed under the GNU GPLv2 or later.
 
 You need kdelibs >= 4.4.
 
-It will build with 4.3, but notifications from KDE applications will not go
-through Colibri because kdelibs 4.3 does not use FreeDesktop notifications
-(unless you are using Kubuntu Karmic, which backported the FreeDesktop
-notifications support).
-
 Build it with:
 
     mkdir build
