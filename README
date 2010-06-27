@@ -29,60 +29,41 @@ You may need to replace /usr with the path to your KDE installation.
 
 # Enabling Colibri notifications
 
-Enabling Colibri notifications can be a bit tricky:
+Enabling Colibri notifications can be a bit tricky.
 
+First you need to open Colibri module in "System Settings":
+- Start "System Settings"
+- Open the "System and Application Notifications" category
+- Select "Colibri Notifications"
 
-## First, disable Plasma notifications
+## Another notification system is running
 
+If there is an error bar telling you to stop an existing notification system,
+here is how to do it, depending on the current notification system.
+
+If the system is "notify-osd" or "notification-daemon", just stop them with
+"killall notify-osd" or "killall notification-daemon".
+
+If the system is "Plasma", you must disable notification handling in Plasma.
+
+To do so on KDE 4.4:
 - Right-click on the systemtray applet
 - Select "System Tray Settings"
 - Uncheck the "Application notifications" box
 
+To do so on KDE 4.5:
+- Right-click on the (i) icon in the systemtray applet
+- Select "Notification Settings"
+- Unckeck the "Application notifications" box
 
-## Second, check the .service file
+## No notification system is running
 
-Make sure the .service file is correctly installed. On most systems it should
-be there:
+Just click the "Start Colibri" button.
 
-/usr/share/dbus-1/services/org.freedesktop.Notifications.service
+## Testing it
 
-This file should contains an "Exec=..." line pointing to Colibri binary.
-
-
-## Third, test it
-
-Run this:
-
-    notify-send Hello
-
-You should get a nice Colibri notification in the top-right corner.
-
-(You may need to install a separate package for notify-send. On Kubuntu, the
-package is libnotify-bin)
-
-Here is a nicer one:
-
-    notify-send -i dialog-information 'Hello!' 'This is a Colibri notification'
-
-If for some reason you do not get a Colibri notification, you can configure KDE
-to start Colibri at login time, instead of relying on DBus activation (triggered
-by the org.freedesktop.Notifications.service file). This can be done via System
-Settings:
-
-- Go to the "Advanced" tab
-- Open the "Autostart" module
-- Click on "Add Program..."
-- Enter "/usr/bin/colibri" (or wherever the colibri binary happens to be
-  installed)
-- Click "OK"
-
-
-# Configuration
-
-The only configuration for now is the position of the notification. This can be
-configured from "System Settings": Colibri installs a configuration module in
-the "Desktop" category.
-
+Click the "Preview" button, you should see a notification appear in the
+selected corner.
 
 # A bit of history
 
