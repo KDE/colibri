@@ -12,5 +12,8 @@
         <entry name="AutoStart" type="Bool">
             <default>true</default>
         </entry>
+        <entry name="Screen" type="Int">
+            <default>-1</default>
+        </entry>
     </group>
 </kcfg>

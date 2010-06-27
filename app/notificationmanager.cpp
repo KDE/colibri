@@ -202,6 +202,7 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     // Update config, KCM may have changed it
     mConfig->readConfig();
     widget->setAlignment(Qt::Alignment(mConfig->alignment()));
+    widget->setScreen(mConfig->screen());
     connect(widget, SIGNAL(closed(uint, uint)), SLOT(slotNotificationWidgetClosed(uint, uint)));
     mWidgets << widget;
     if (mWidgets.size() == 1) {

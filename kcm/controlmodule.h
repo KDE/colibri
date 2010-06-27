@@ -51,6 +51,7 @@ private Q_SLOTS:
     void updateStateInformation();
     void startColibri();
     void preview();
+    void fillScreenComboBox();
 
 private:
     Config* mConfig;

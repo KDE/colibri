@@ -207,6 +207,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mTextLabel(new QLabel(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
+, mScreen(-1)
 , mBackground(new Plasma::FrameSvg(this))
 , mState(new HiddenState(this))
 , mMousePollTimer(new QTimer(this))
@@ -334,6 +335,11 @@ void NotificationWidget::setAlignment(Qt::Alignment alignment)
     mAlignment = alignment;
 }
 
+void NotificationWidget::setScreen(int screen)
+{
+    mScreen = screen;
+}
+
 void NotificationWidget::closeWidget()
 {
     mCloseReason = CLOSE_REASON_CLOSED_BY_APP;
@@ -352,7 +358,12 @@ void NotificationWidget::start()
 QRect NotificationWidget::idealGeometry() const
 {
     QSize sh = minimumSizeHint();
-    QRect rect = QApplication::desktop()->availableGeometry(QCursor::pos());
+    QRect rect;
+    if (mScreen == -1) {
+        rect = QApplication::desktop()->availableGeometry(QCursor::pos());
+    } else {
+        rect = QApplication::desktop()->availableGeometry(mScreen);
+    }
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();

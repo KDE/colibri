@@ -109,6 +109,9 @@
           </item>
          </layout>
         </item>
+        <item row="1" column="1">
+         <widget class="KComboBox" name="screenComboBox"/>
+        </item>
        </layout>
       </item>
       <item>
@@ -193,6 +196,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>KComboBox</class>
+   <extends>QComboBox</extends>
+   <header>kcombobox.h</header>
+  </customwidget>
   <customwidget>
    <class>Colibri::AlignmentSelector</class>
    <extends>QWidget</extends>

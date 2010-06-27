@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QDBusInterface>
 #include <QDBusServiceWatcher>
 #include <QDBusReply>
+#include <QDesktopWidget>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -85,6 +86,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     connect(watcher, SIGNAL(serviceOwnerChanged(const QString&, const QString&, const QString&)),
         SLOT(updateStateInformation()));
 
+    fillScreenComboBox();
     updateStateInformation();
 }
 
@@ -97,12 +99,17 @@ ControlModule::~ControlModule()
 void ControlModule::load()
 {
     mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->alignment()));
+    mUi->screenComboBox->setCurrentIndex(
+        mUi->screenComboBox->findData(mConfig->screen())
+        );
     KCModule::load();
 }
 
 void ControlModule::save()
 {
     mConfig->setAlignment(int(mUi->alignmentSelector->alignment()));
+    int screen = mUi->screenComboBox->itemData(mUi->screenComboBox->currentIndex()).toInt();
+    mConfig->setScreen(screen);
     mConfig->writeConfig();
     KCModule::save();
 }
@@ -111,6 +118,9 @@ void ControlModule::defaults()
 {
     KCModule::defaults();
     mUi->alignmentSelector->setAlignment(Qt::Alignment(mConfig->defaultAlignmentValue()));
+    mUi->screenComboBox->setCurrentIndex(
+        mUi->screenComboBox->findData(mConfig->defaultScreenValue())
+        );
     updateUnmanagedWidgetChangeState();
 }
 
@@ -221,6 +231,20 @@ void ControlModule::preview()
 
     if (reply.isValid()) {
         mLastPreviewId = reply.value();
+    }
+}
+
+void ControlModule::fillScreenComboBox()
+{
+    mUi->screenComboBox->clear();
+    mUi->screenComboBox->addItem(i18n("Screen under mouse"), -1);
+    int count = QApplication::desktop()->screenCount();
+    if (count > 1) {
+        for (int screen=0; screen < count; ++screen) {
+            mUi->screenComboBox->addItem(i18n("Screen %1", screen + 1), screen);
+        }
+    } else {
+        mUi->screenComboBox->setEnabled(false);
     }
 }
 

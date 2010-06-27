@@ -104,6 +104,8 @@ public:
 
     void setAlignment(Qt::Alignment);
 
+    void setScreen(int);
+
     uint id() const { return mId; }
 
     QString appName() const { return mAppName; }
@@ -144,6 +146,7 @@ private:
 
     uint mCloseReason;
     Qt::Alignment mAlignment;
+    int mScreen;
     Plasma::FrameSvg* mBackground;
 
     State* mState;
