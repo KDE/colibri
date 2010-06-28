@@ -70,16 +70,15 @@ AlignmentSelector::AlignmentSelector(QWidget* parent)
 , mPreviousCheckedId(-1)
 {
     mMonitorSvg->setImagePath("widgets/monitor");
-    int baseHeight = mMonitorSvg->elementSize("base").height();
     qreal left, top, right, bottom;
     mMonitorSvg->getMargins(left, top, right, bottom);
-    setContentsMargins(left, top, right, bottom + baseHeight);
+    setContentsMargins(left, top, right, bottom);
 
     // A bit ugly but should work reasonably for now
     QDesktopWidget* desktop = QApplication::desktop();
     QRect rect = desktop->availableGeometry(desktop->screenNumber(this));
     qreal ratio = qreal(rect.width()) / rect.height();
-    setFixedSize(250, 250 / ratio + baseHeight);
+    setFixedSize(250, 250 / ratio);
 
     QGridLayout* layout = new QGridLayout(this);
 
@@ -127,19 +126,14 @@ Qt::Alignment AlignmentSelector::alignment() const
 
 void AlignmentSelector::resizeEvent(QResizeEvent*)
 {
-    QSize baseSize = mMonitorSvg->elementSize("base");
-    mMonitorSvg->resizeFrame(QSize(width(), height() - baseSize.height()));
+    mMonitorSvg->resizeFrame(QSize(width(), height()));
 }
 
 void AlignmentSelector::paintEvent(QPaintEvent*)
 {
-    QSize baseSize = mMonitorSvg->elementSize("base");
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     mMonitorSvg->paintFrame(&painter);
-
-    mMonitorSvg->paint(&painter, (width() - baseSize.width()) / 2, height() - baseSize.height(), "base");
 }
 
 } // namespace
