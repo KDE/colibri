@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <QPaintEvent>
 #include <QTimeLine>
 #include <QTimer>
 #include <QX11Info>
@@ -49,6 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <Plasma/Theme>
 
 // Local
+#include "label.h"
 
 namespace Colibri
 {
@@ -74,7 +76,6 @@ static const qreal MOUSE_OVER_OPACITY_MIN = .4;
 // When running on a non composited desktop, if opacity is less than this value
 // the widget will be hidden (should not be less than MOUSE_OVER_OPACITY_MIN!)
 static const qreal NON_COMPOSITED_OPACITY_THRESHOLD = .4;
-
 
 ////////////////////////////////////////////////////:
 // State
@@ -204,7 +205,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mSummary(summary)
 , mBody(cleanBody(body))
 , mVisibleTimeLine(new QTimeLine(timeout, this))
-, mTextLabel(new QLabel(this))
+, mTextLabel(new Label(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mScreen(-1)
@@ -240,8 +241,8 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 
     mBackground->setImagePath("widgets/tooltip");
     const int topHeight = mBackground->marginSize(Plasma::TopMargin);
-    const int leftWidth = mBackground->marginSize(Plasma::LeftMargin);
-    const int rightWidth = mBackground->marginSize(Plasma::RightMargin);
+    const int leftWidth = mBackground->marginSize(Plasma::LeftMargin) + Label::HaloMargin;
+    const int rightWidth = mBackground->marginSize(Plasma::RightMargin) + Label::HaloMargin;
     const int bottomHeight = mBackground->marginSize(Plasma::BottomMargin);
     setContentsMargins(leftWidth, topHeight, rightWidth, bottomHeight);
 
@@ -250,13 +251,19 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
         iconLabel = 0;
     } else {
         iconLabel = new QLabel(this);
-        iconLabel->setAlignment(Qt::AlignTop | Qt::AlignCenter);
+        iconLabel->setAlignment(Qt::AlignCenter);
         iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        iconLabel->setPixmap(pix);
+
+        // Translate the pixmap 'Label::HaloMargin' pixels down so that it's
+        // aligned with the text content
+        QPixmap pix2(pix.width(), pix.height() + 2 * Label::HaloMargin);
+        pix2.fill(Qt::transparent);
+        QPainter painter(&pix2);
+        painter.drawPixmap(0, Label::HaloMargin, pix);
+        painter.end();
+        iconLabel->setPixmap(pix2);
     }
 
-    mTextLabel->setWordWrap(true);
-    mTextLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     Plasma::Theme* theme = Plasma::Theme::defaultTheme();
     mTextLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
@@ -270,11 +277,14 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mTextLabel->setPalette(palette);
 
     QHBoxLayout* layout = new QHBoxLayout(this);
+    layout->setMargin(0);
     layout->setSpacing(KDialog::spacingHint());
     if (iconLabel) {
-        layout->addWidget(iconLabel, 0 /* stretch */, Qt::AlignTop | Qt::AlignLeft);
+        layout->addWidget(iconLabel);
+        layout->setAlignment(iconLabel, Qt::AlignHCenter | Qt::AlignTop);
     }
     layout->addWidget(mTextLabel);
+    layout->setAlignment(mTextLabel, Qt::AlignLeft | Qt::AlignVCenter);
 
     // Behavior
     setWindowOpacity(0);

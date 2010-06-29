@@ -39,6 +39,8 @@ class FrameSvg;
 namespace Colibri
 {
 
+class Label;
+
 class NotificationWidget;
 
 class State : public QObject
@@ -142,7 +144,7 @@ private:
     QString mBody;
     QTimeLine* mVisibleTimeLine;
 
-    QLabel* mTextLabel;
+    Label* mTextLabel;
 
     uint mCloseReason;
     Qt::Alignment mAlignment;
