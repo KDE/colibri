@@ -33,7 +33,8 @@ namespace Colibri
 {
 
 /**
- * A label with Plasma-like halo behind its text
+ * A label with Plasma-like halo behind its text.
+ * Heavily inspired from the TipTextWidget (kdelibs/plasma/private/tooltip.cpp)
  */
 class Label : public QWidget
 {
