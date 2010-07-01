@@ -40,11 +40,16 @@ Label::Label(QWidget* parent)
 , mDocument(new QTextDocument(this))
 {
     mDocument->setDocumentMargin(0);
+
+    Plasma::Theme* theme = Plasma::Theme::defaultTheme();
+    setFont(theme->font(Plasma::Theme::DefaultFont));
+    QColor textColor = theme->color(Plasma::Theme::TextColor);
+    mDocument->setDefaultStyleSheet(QString("body { color: %1; }").arg(textColor.name()));
 }
 
 void Label::setText(const QString& text)
 {
-    mDocument->setHtml(text);
+    mDocument->setHtml("<body>" + text + "</body>");
     mDocument->adjustSize();
     mHaloRects.clear();
     for (QTextBlock block = mDocument->begin(); block.isValid(); block = block.next()) {

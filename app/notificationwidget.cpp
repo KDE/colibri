@@ -265,16 +265,10 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     }
 
     mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    Plasma::Theme* theme = Plasma::Theme::defaultTheme();
-    mTextLabel->setFont(theme->font(Plasma::Theme::DefaultFont));
 
     int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
     mTextLabel->setFixedWidth(27 * averageCharWidth);
     updateTextLabel();
-
-    QPalette palette = mTextLabel->palette();
-    palette.setColor(QPalette::WindowText, theme->color(Plasma::Theme::TextColor));
-    mTextLabel->setPalette(palette);
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setMargin(0);
