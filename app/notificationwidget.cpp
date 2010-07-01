@@ -267,7 +267,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
     int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
-    mTextLabel->setFixedWidth(27 * averageCharWidth);
+    mTextLabel->setMinimumWidth(40 * averageCharWidth);
     updateTextLabel();
 
     QHBoxLayout* layout = new QHBoxLayout(this);
