@@ -267,7 +267,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
     int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
-    mTextLabel->setMinimumWidth(40 * averageCharWidth);
+    mTextLabel->setMinimumWidth(27 * averageCharWidth);
     updateTextLabel();
 
     QHBoxLayout* layout = new QHBoxLayout(this);
@@ -308,6 +308,7 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
     updateTextLabel();
     if (isVisible()) {
         mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
+        mGrowAnimation->setEasingCurve(QEasingCurve::OutQuad);
         mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
         mGrowAnimation->setStartValue(geometry());
         mGrowAnimation->setEndValue(idealGeometry());
