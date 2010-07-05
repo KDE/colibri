@@ -70,6 +70,8 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     setAboutData(about);
 
     mUi->setupUi(this);
+    // Fix height so that it does not grow or shrink depending on the visibility of the "Start" button
+    mUi->stateContainer->setFixedHeight(mUi->stateContainer->sizeHint().height());
 
     addConfig(mConfig, this);
 
