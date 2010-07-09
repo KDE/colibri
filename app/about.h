@@ -1,7 +1,9 @@
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 /*
 Colibri: Light notification system for KDE4
-Copyright 2009 Aurélien Gâteau <agateau@kde.org>
+Copyright 2010 Aurélien Gâteau <agateau@kde.org>
+
+Based on Ayatana Notifications for Plasma, Copyright 2009 Canonical Ltd.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,22 +20,22 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
 
 */
-// KDE
-#include <KApplication>
-#include <KAboutData>
-#include <KCmdLineArgs>
-#include <KLocale>
+#ifndef VERSION_H
+#define VERSION_H
 
-// Locale
-#include "notificationmanager.h"
-#include "about.h"
+static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
+static const char* VERSION = "0.2.0";
 
-int main(int argc, char **argv)
+KAboutData* createAboutData()
 {
-    KAboutData* about = createAboutData();
-    KCmdLineArgs::init(argc, argv, about);
-
-    KApplication app;
-    Colibri::NotificationManager manager;
-    return app.exec();
+    KAboutData* about = new KAboutData(
+        "colibri", 0, ki18n("Colibri"),
+        VERSION, ki18n(DESCRIPTION),
+        KAboutData::License_GPL,
+        ki18n("(C) 2009-2010 Aurélien Gâteau"),
+        KLocalizedString(), 0, "agateau@kde.org");
+    about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
+    return about;
 }
+
+#endif /* VERSION_H */

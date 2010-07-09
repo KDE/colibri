@@ -40,9 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include "alignmentselector.h"
 #include "config.h"
 #include "ui_controlmodule.h"
-
-static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
-static const char* VERSION = "0.1.0";
+#include "about.h"
 
 static const char* DBUS_INTERFACE = "org.freedesktop.Notifications";
 static const char* DBUS_SERVICE = "org.freedesktop.Notifications";
@@ -60,13 +58,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 , mUi(new Ui::ControlModule)
 , mLastPreviewId(0)
 {
-    KAboutData* about = new KAboutData(
-        "colibri", 0, ki18n("Colibri"),
-        VERSION, ki18n(DESCRIPTION),
-        KAboutData::License_GPL,
-        ki18n("(C) 2009 Aurélien Gâteau"),
-        KLocalizedString(), 0, "agateau@kde.org");
-    about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
+    KAboutData* about = createAboutData();
     setAboutData(about);
 
     mUi->setupUi(this);
