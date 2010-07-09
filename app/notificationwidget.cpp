@@ -48,6 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 #include <Plasma/FrameSvg>
 #include <Plasma/Theme>
+#include <Plasma/WindowEffects>
 
 // Local
 #include "label.h"
@@ -399,7 +400,16 @@ void NotificationWidget::paintEvent(QPaintEvent*)
 void NotificationWidget::resizeEvent(QResizeEvent*)
 {
     mBackground->resizeFrame(size());
+#if KDE_IS_VERSION(4, 5, 0)
+    if (Plasma::Theme::defaultTheme()->windowTranslucencyEnabled()) {
+        Plasma::WindowEffects::enableBlurBehind(winId(), true, mBackground->mask());
+        clearMask();
+    } else {
+        setMask(mBackground->mask());
+    }
+#else
     setMask(mBackground->mask());
+#endif
 }
 
 void NotificationWidget::updateOpacity()
