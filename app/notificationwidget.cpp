@@ -369,7 +369,8 @@ void NotificationWidget::start()
 
 QRect NotificationWidget::idealGeometry() const
 {
-    QSize sh = minimumSizeHint();
+    QSize sh = sizeHint();
+
     QRect rect = QApplication::desktop()->availableGeometry(mScreen);
     int left, top;
     if (mAlignment & Qt::AlignTop) {
