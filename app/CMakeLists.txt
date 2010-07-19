@@ -20,6 +20,8 @@ kde4_add_executable(colibri ${colibri_SRCS})
 target_link_libraries(colibri
     ${KDE4_KDEUI_LIBS}
     ${KDE4_PLASMA_LIBS}
+    ${X11_Xext_LIB}
+    ${X11_X11_LIB}
 )
 
 install(TARGETS colibri ${INSTALL_TARGETS_DEFAULT_ARGS})
