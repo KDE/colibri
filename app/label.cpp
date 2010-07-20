@@ -56,9 +56,11 @@ void Label::setText(const QString& text)
         QTextLayout* layout = block.layout();
         for (int i = 0; i < layout->lineCount(); ++i) {
             QTextLine line = layout->lineAt(i);
-            mHaloRects << line.naturalTextRect()
-                .translated(layout->position().toPoint())
-                .translated(HaloMargin, HaloMargin);
+            if (line.textLength() > 0) {
+                mHaloRects << line.naturalTextRect()
+                    .translated(layout->position().toPoint())
+                    .translated(HaloMargin, HaloMargin);
+            }
         }
     }
     updateGeometry();
