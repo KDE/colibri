@@ -58,6 +58,8 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 , mUi(new Ui::ControlModule)
 , mLastPreviewId(0)
 {
+    KGlobal::locale()->insertCatalog("colibri");
+
     KAboutData* about = createAboutData();
     setAboutData(about);
 
