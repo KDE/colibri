@@ -1,6 +1,6 @@
 project(colibri)
 cmake_minimum_required(VERSION 2.6)
-set(PROJECT_VERSION "0.1.1")
+set(PROJECT_VERSION "0.2.0")
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${PROJECT_VERSION})
 add_custom_target(dist

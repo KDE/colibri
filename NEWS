@@ -1,3 +1,26 @@
+# 2010.07.22 - 0.2.0
+## New features
+- When a second notification arrives from the same application, using the same
+  title, append it to the existing notification.
+- Notifications use blurred background on KDE 4.5.
+- Notifications use a background halo behind text, similar to what Plasma
+  tooltips do since KDE 4.4, as well as the Plasma theme foreground color.
+- Implemented support for the replacesId parameter.
+- It is now possible to specify the screen where the notifications will appear.
+- A "Preview" button has been added to the KCM.
+- It is now possible to start Colibri from within the KCM.
+- Turkish translation for desktop file by Ozan Çağlayan.
+- German translation for desktop file by Michael Gangolf.
+- Serbian translation for desktop file by Mladen Pejaković.
+
+## Fixes
+- KCM is now translatable.
+- The KCM has moved (again!) to the notification group.
+- Use an autostart file to start Colibri instead of relying on the DBus service
+  system. This solves file conflict problems with other notification systems and
+  ensures Colibri is started when the first KDE notification is sent.
+- Fixed linking with gold.
+
 # 2010.02.16 - 0.1.1
 - Moved the KCM to the Desktop category.
 - Emit the NotificationClosed() signal when a notification is closed. This fixes

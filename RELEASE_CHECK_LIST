@@ -1,0 +1,15 @@
+- Update NEWS
+  r!git log --pretty=format:'- \%s (\%an)' x.y.z-1..HEAD
+- Bump version number in CMakeLists.txt and in app/about.h
+- Commit
+- Create tarball
+- Unpack tarball, build and run tests
+- If ok, create "x.y.z" tag
+  git tag -a x.y.z
+- Push
+  git push
+  git push --tags
+
+- Upload on kde-apps.org
+
+- Blog
