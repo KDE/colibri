@@ -304,7 +304,7 @@ void NotificationWidget::updateTextLabel()
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
-    mBody += cleanBody(body);
+    mBody += "<br/>" + cleanBody(body);
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
     if (isVisible()) {
