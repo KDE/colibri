@@ -15,7 +15,7 @@
 
 ## Fixes
 - KCM is now translatable.
-- The KCM has moved (again!) to the notification group (only for KDE 4.5).
+- The KCM has moved (again!) to the notification group.
 - Use an autostart file to start Colibri instead of relying on the DBus service
   system. This solves file conflict problems with other notification systems and
   ensures Colibri is started when the first KDE notification is sent.

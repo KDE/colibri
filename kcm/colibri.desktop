@@ -7,7 +7,7 @@ X-KDE-Library=kcm_colibri
 X-KDE-ParentApp=kcontrol
 Categories=Qt;KDE;X-KDE-settings-looknfeel;
 
-X-KDE-System-Settings-Parent-Category=desktop
+X-KDE-System-Settings-Parent-Category=notifications
 X-KDE-System-Settings-Parent-Category-V2=application-and-system-notifications
 X-KDE-Keywords=notification
 
