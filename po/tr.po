@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugs.kde.org\n"
 "POT-Creation-Date: 2010-07-20 22:43+0200\n"
-"PO-Revision-Date: 2010-07-21 09:00+0300\n"
+"PO-Revision-Date: 2010-07-21 09:34+0300\n"
 "Last-Translator: Ozan Çağlayan <ozan@pardus.org.tr>\n"
 "Language-Team: Turkish <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -61,7 +61,7 @@ msgstr "Bu Colibri bildirimlerinin bir önizlemesidir"
 
 #: kcm/controlmodule.cpp:234
 msgid "Screen under mouse"
-msgstr "İmleç altındaki ekran"
+msgstr "Farenin bulunduğu ekran"
 
 #: kcm/controlmodule.cpp:238
 msgid "Screen %1"
