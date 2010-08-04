@@ -2,8 +2,8 @@
   r!git log --pretty=format:'- \%s (\%an)' x.y.z-1..HEAD
 - Bump version number in CMakeLists.txt and in app/about.h
 - Commit
-- Create tarball
-- Unpack tarball, build and run tests
+- Create tarball and check it builds
+  make distcheck
 - If ok, create "x.y.z" tag
   git tag -a x.y.z
 - Push

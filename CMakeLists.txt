@@ -9,6 +9,18 @@ add_custom_target(dist
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+add_custom_target(distcheck
+    COMMAND cd ${CMAKE_BINARY_DIR}
+    && rm -rf ${ARCHIVE_NAME}
+    && tar xf ${ARCHIVE_NAME}.tar.bz2
+    && mkdir ${ARCHIVE_NAME}/build
+    && cd ${ARCHIVE_NAME}/build
+    && cmake -DCMAKE_INSTALL_PREFIX=../install ..
+    && make
+    && make install
+    )
+add_dependencies(distcheck dist)
+
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 find_package(KDE4 4.4 REQUIRED)
