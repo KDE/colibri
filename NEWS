@@ -1,4 +1,4 @@
-# 2010.07.22 - 0.2.0
+# 2010.08.05 - 0.2.0
 ## New features
 - When a second notification arrives from the same application, using the same
   title, append it to the existing notification.
