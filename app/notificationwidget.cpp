@@ -413,6 +413,12 @@ void NotificationWidget::resizeEvent(QResizeEvent*)
 #endif
 }
 
+void NotificationWidget::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event);
+    Plasma::WindowEffects::overrideShadow(winId(), true);
+}
+
 void NotificationWidget::updateOpacity()
 {
     const qreal opacity = mFadeOpacity * mMouseOverOpacity;

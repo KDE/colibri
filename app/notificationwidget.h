@@ -132,6 +132,7 @@ Q_SIGNALS:
 protected:
     virtual void paintEvent(QPaintEvent*);
     virtual void resizeEvent(QResizeEvent*);
+    virtual void showEvent(QShowEvent*);
 
 private Q_SLOTS:
     void updateOpacity();
