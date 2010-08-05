@@ -44,19 +44,24 @@ NotificationManager::NotificationManager()
 , mConfig(new Config)
 {
     new NotificationsAdaptor(this);
+}
+
+bool NotificationManager::connectOnDBus()
+{
     bool ok;
     QDBusConnection connection = QDBusConnection::sessionBus();
     ok = connection.registerObject("/org/freedesktop/Notifications", this);
     if (!ok) {
         kWarning() << "Could not register object /org/freedesktop/Notifications";
-        return;
+        return false;
     }
     ok = connection.registerService("org.freedesktop.Notifications");
     if (!ok) {
         kWarning() << "Could not register service org.freedesktop.Notifications";
-        return;
+        return false;
     }
     kDebug() << "Registered";
+    return true;
 }
 
 NotificationManager::~NotificationManager()

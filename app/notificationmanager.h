@@ -42,6 +42,8 @@ public:
     NotificationManager();
     ~NotificationManager();
 
+    bool connectOnDBus();
+
     uint Notify(const QString& appName, uint replacesId, const QString& appIcon, const QString& summary, const QString& body, const QStringList& actions, const QVariantMap& hints, int timeout);
 
     void CloseNotification(uint id);
