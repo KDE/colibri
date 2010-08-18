@@ -10,6 +10,8 @@
   git push
   git push --tags
 
-- Upload on kde-apps.org
+- Add new version number on https://bugs.kde.org
+- Update PPA
 
+- Upload on http://kde-apps.org
 - Blog
