@@ -18,6 +18,7 @@ Name[de]=Colibri Benachrichtigungen
 Name[tr]=Colibri Bildirimleri
 Name[es]=Notificaciones de Colibrí
 Name[it]=Notifiche di Colibri
+Name[sk]=Upozornenia Colibri
 
 Comment=Configure Colibri notifications
 Comment[sr]=Подешавање Колибри обавештења
@@ -26,3 +27,4 @@ Comment[de]=Colibri Benachrichtigungen konfigurieren
 Comment[tr]=Colibri bildirimlerini yapılandır
 Comment[es]=Configurar las notificaciones de Colibrí
 Comment[it]=Configura le notifiche di Colibri
+Comment[sk]=Nastavenie upozornení Colibri
