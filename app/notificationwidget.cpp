@@ -53,6 +53,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // Local
 #include "label.h"
 
+// Enable this to quit colibri after one notification. Useful for memchecking
+// with Valgrind.
+//#define QUIT_AFTER_ONE
+
 namespace Colibri
 {
 
@@ -487,6 +491,9 @@ void NotificationWidget::updateMouseOverOpacity()
 void NotificationWidget::emitClosed()
 {
     emit closed(mId, mCloseReason);
+#ifdef QUIT_AFTER_ONE
+    QCoreApplication::exit();
+#endif
 }
 
 } // namespace
