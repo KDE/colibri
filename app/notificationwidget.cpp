@@ -86,7 +86,8 @@ static const qreal NON_COMPOSITED_OPACITY_THRESHOLD = .4;
 // State
 ////////////////////////////////////////////////////:
 State::State(NotificationWidget* widget)
-: mNotificationWidget(widget)
+: QObject(widget)
+, mNotificationWidget(widget)
 {}
 
 void State::switchToState(State* state)
@@ -116,7 +117,7 @@ public:
 FadeInState::FadeInState(NotificationWidget* widget)
 : State(widget)
 {
-    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity");
+    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity", this);
     anim->setDuration(DEFAULT_FADE_IN_TIMEOUT);
     // FIXME: Adjust duration according to current opacity
     anim->setStartValue(mNotificationWidget->fadeOpacity());
@@ -164,7 +165,7 @@ void VisibleState::onMouseLeave()
 FadeOutState::FadeOutState(NotificationWidget* widget)
 : State(widget)
 {
-    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity");
+    QPropertyAnimation* anim = new QPropertyAnimation(widget, "fadeOpacity", this);
     anim->setDuration(DEFAULT_FADE_OUT_TIMEOUT);
     anim->setStartValue(1.);
     anim->setEndValue(0.);
