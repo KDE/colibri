@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #define VERSION_H
 
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
-static const char* VERSION = "0.2.1";
+static const char* VERSION = "0.2.2";
 
 KAboutData* createAboutData()
 {
