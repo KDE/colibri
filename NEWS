@@ -1,12 +1,13 @@
 # 2011.09.25 - 0.2.2
+## Fixes
 - Plug three small mem leaks. Should also fix a rare crasher. (Aurélien Gâteau)
-- Add debug define (Aurélien Gâteau)
-- Add pt_BR translations for .desktop file (Caio Romão)
-- Added sk translation from Slavko (Slavko)
-- Add Portuguese (Brazil) internationalization file (Caio Romão)
-- Italian translation by Federico Chiacchiaretta (Federico Chiacchiaretta)
-- Czech translation by Pavel Fric (Pavel Fric)
-- Spanish translation by Gejo (gejo)
+
+## Translations
+- Brasilian Portuguese (Caio Romão)
+- Slovakian (Slavko)
+- Italian (Federico Chiacchiaretta)
+- Czech (Pavel Fric)
+- Spanish (gejo)
 
 # 2010.08.06 - 0.2.1
 ## Fixes
