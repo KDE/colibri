@@ -429,7 +429,9 @@ void NotificationWidget::updateOpacity()
     const qreal opacity = mFadeOpacity * mMouseOverOpacity;
     if (KWindowSystem::compositingActive()) {
         setWindowOpacity(opacity);
+        setVisible(true);
     } else {
+        setWindowOpacity(1.);
         setVisible(opacity > NON_COMPOSITED_OPACITY_THRESHOLD);
     }
 }
