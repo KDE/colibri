@@ -47,7 +47,7 @@ static const char* DBUS_SERVICE = "org.freedesktop.Notifications";
 static const char* DBUS_PATH = "/org/freedesktop/Notifications";
 
 K_PLUGIN_FACTORY(ColibriModuleFactory, registerPlugin<Colibri::ControlModule>();)
-K_EXPORT_PLUGIN(ColibriModuleFactory("kcmcolibri"))
+K_EXPORT_PLUGIN(ColibriModuleFactory("kcmcolibri", "colibri"))
 
 namespace Colibri
 {
