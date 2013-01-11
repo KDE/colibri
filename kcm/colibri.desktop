@@ -10,7 +10,25 @@ Categories=Qt;KDE;X-KDE-settings-looknfeel;
 X-KDE-System-Settings-Parent-Category=notifications
 X-KDE-System-Settings-Parent-Category-V2=application-and-system-notifications
 X-KDE-Keywords=notification
+X-KDE-Keywords[cs]=oznamování
+X-KDE-Keywords[nl]=melding
+X-KDE-Keywords[pt]=notificação
+X-KDE-Keywords[pt_BR]=notificação
+X-KDE-Keywords[uk]=notification;сповіщення
+X-KDE-Keywords[x-test]=xxnotificationxx
 
 Name=Colibri Notifications
+Name[cs]=Oznamování Colibri
+Name[nl]=Meldingen van Colibri
+Name[pt]=Notificações do Colibri
+Name[pt_BR]=Notificações do Colibri
+Name[uk]=Сповіщення Colibri
+Name[x-test]=xxColibri Notificationsxx
 
 Comment=Configure Colibri notifications
+Comment[cs]=Nastavit oznamování Colibri
+Comment[nl]=Meldingen van Colibri instellen
+Comment[pt]=Configurar as notificações do Colibri
+Comment[pt_BR]=Configura as notificações do Colibri
+Comment[uk]=Налаштувати сповіщення Colibri
+Comment[x-test]=xxConfigure Colibri notificationsxx

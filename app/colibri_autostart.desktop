@@ -1,8 +1,20 @@
 [Desktop Entry]
 Name=Colibri
+Name[cs]=Colibri
+Name[nl]=Colibri
+Name[pt]=Colibri
+Name[pt_BR]=Colibri
+Name[uk]=Colibri
+Name[x-test]=xxColibrixx
 Exec=colibri
 Icon=notifications
 Type=Application
 Comment=Colibri autostart at login
+Comment[cs]=Automatické spouštění Colibri při startu
+Comment[nl]=Colibri automatisch starten bij aanmelden
+Comment[pt]=Auto-arranque do Colibri no início
+Comment[pt_BR]=Carrega automaticamente o Colibri no início da sessão
+Comment[uk]=Автозапуск Colibri під час входу до системи
+Comment[x-test]=xxColibri autostart at loginxx
 Terminal=false
 X-KDE-autostart-condition=colibrirc:General:AutoStart:true
