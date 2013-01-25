@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Colibri
 Name[cs]=Colibri
+Name[de]=Colibri
 Name[et]=Colibri
 Name[nl]=Colibri
 Name[pt]=Colibri
@@ -14,6 +15,7 @@ Icon=notifications
 Type=Application
 Comment=Colibri autostart at login
 Comment[cs]=Automatické spouštění Colibri při startu
+Comment[de]=Autostart von Colibri bei der Anmeldung
 Comment[et]=Colibri automaatne käivitamine sisselogimisel
 Comment[nl]=Colibri automatisch starten bij aanmelden
 Comment[pt]=Auto-arranque do Colibri no início

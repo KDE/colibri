@@ -11,6 +11,7 @@ X-KDE-System-Settings-Parent-Category=notifications
 X-KDE-System-Settings-Parent-Category-V2=application-and-system-notifications
 X-KDE-Keywords=notification
 X-KDE-Keywords[cs]=oznamování
+X-KDE-Keywords[de]=Benachrichtigung
 X-KDE-Keywords[et]=märguanne
 X-KDE-Keywords[nl]=melding
 X-KDE-Keywords[pt]=notificação
@@ -22,6 +23,7 @@ X-KDE-Keywords[x-test]=xxnotificationxx
 
 Name=Colibri Notifications
 Name[cs]=Oznamování Colibri
+Name[de]=Colibri-Benachrichtigungen
 Name[et]=Colibri märguanded
 Name[nl]=Meldingen van Colibri
 Name[pt]=Notificações do Colibri
@@ -33,6 +35,7 @@ Name[x-test]=xxColibri Notificationsxx
 
 Comment=Configure Colibri notifications
 Comment[cs]=Nastavit oznamování Colibri
+Comment[de]=Colibri-Benachrichtigungen einrichten
 Comment[et]=Colibri märguannete seadistamine
 Comment[nl]=Meldingen van Colibri instellen
 Comment[pt]=Configurar as notificações do Colibri
