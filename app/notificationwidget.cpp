@@ -33,25 +33,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QApplication>
 #include <QCursor>
 #include <QDesktopWidget>
-#include <QHBoxLayout>
+#include <QGraphicsLinearLayout>
+#include <QGraphicsWidget>
 #include <QLabel>
-#include <QPainter>
-#include <QPaintEvent>
 #include <QTimeLine>
 #include <QTimer>
 #include <QX11Info>
 
 // KDE
 #include <KDebug>
-#include <KDialog>
+#include <KIconLoader>
 #include <KWindowSystem>
 
 #include <Plasma/FrameSvg>
+#include <Plasma/Label>
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
 // Local
-#include "label.h"
 
 // Enable this to quit colibri after one notification. Useful for memchecking
 // with Valgrind.
@@ -202,89 +201,97 @@ static QString cleanBody(const QString& _body)
     return "<div>" + body + "</div>";
 }
 
+static QPixmap pixmapFromImage(const QImage& image_)
+{
+    if (image_.isNull()) {
+        return QPixmap();
+    }
+    QImage image = image_;
+    if (qMax(image.width(), image.height()) > ICON_SIZE) {
+        image = image.scaled(ICON_SIZE, ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+    return QPixmap::fromImage(image);
+}
+
+static QPixmap pixmapFromAppIcon(const QString& appIcon)
+{
+    if (appIcon.isEmpty()) {
+        return QPixmap();
+    }
+    return KIconLoader::global()->loadIcon(appIcon, KIconLoader::Panel,
+        ICON_SIZE,
+        KIconLoader::DefaultState,
+        QStringList() /* overlays */,
+        0L /* path_store */,
+        true /* canReturnNull */);
+}
+
 ////////////////////////////////////////////////////:
 // NotificationWidget
 ////////////////////////////////////////////////////:
-NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
-: mAppName(appName)
+NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout)
+: Plasma::Dialog(0, Qt::ToolTip)
+, mAppName(appName)
 , mId(id)
 , mSummary(summary)
 , mBody(cleanBody(body))
 , mVisibleTimeLine(new QTimeLine(timeout, this))
-, mTextLabel(new Label(this))
+, mScene(new QGraphicsScene(this))
+, mContainer(new QGraphicsWidget)
+, mTextLabel(new Plasma::Label)
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mScreen(-1)
-, mBackground(new Plasma::FrameSvg(this))
 , mState(new HiddenState(this))
 , mMousePollTimer(new QTimer(this))
 , mFadeOpacity(1.)
 , mMouseOverOpacity(1.)
 {
+    //Setup the window properties
+    KWindowSystem::setState(winId(), NET::KeepAbove);
+    KWindowSystem::setType(winId(), NET::Tooltip);
+    setAttribute(Qt::WA_X11NetWmWindowTypeToolTip, true);
+
     // Icon
-    QPixmap pix;
-    if (!image_.isNull()) {
-        QImage image = image_;
-        if (qMax(image.width(), image.height()) > ICON_SIZE) {
-            image = image.scaled(ICON_SIZE, ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
-        pix = QPixmap::fromImage(image);
-    } else if (!appIcon.isEmpty()) {
-        pix = KIconLoader::global()->loadIcon(appIcon, KIconLoader::Panel,
-            ICON_SIZE,
-            KIconLoader::DefaultState,
-            QStringList() /* overlays */,
-            0L /* path_store */,
-            true /* canReturnNull */);
+    QPixmap pix = pixmapFromImage(image);
+    if (pix.isNull()) {
+        pix = pixmapFromAppIcon(appIcon);
     }
 
     // UI
-    setWindowFlags(Qt::Tool | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAutoFillBackground(false);
-
     setMinimumHeight(DEFAULT_BUBBLE_MIN_HEIGHT);
 
-    mBackground->setImagePath("widgets/tooltip");
-    const int topHeight = mBackground->marginSize(Plasma::TopMargin);
-    const int leftWidth = mBackground->marginSize(Plasma::LeftMargin) + Label::HaloMargin;
-    const int rightWidth = mBackground->marginSize(Plasma::RightMargin) + Label::HaloMargin;
-    const int bottomHeight = mBackground->marginSize(Plasma::BottomMargin);
-    setContentsMargins(leftWidth, topHeight, rightWidth, bottomHeight);
-
-    QLabel* iconLabel;
+    Plasma::Label* iconLabel;
     if (pix.isNull()) {
         iconLabel = 0;
     } else {
-        iconLabel = new QLabel(this);
-        iconLabel->setAlignment(Qt::AlignCenter);
-        iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-        // Translate the pixmap 'Label::HaloMargin' pixels down so that it's
-        // aligned with the text content
-        QPixmap pix2(pix.width(), pix.height() + 2 * Label::HaloMargin);
-        pix2.fill(Qt::transparent);
-        QPainter painter(&pix2);
-        painter.drawPixmap(0, Label::HaloMargin, pix);
-        painter.end();
-        iconLabel->setPixmap(pix2);
+        QSize size = pix.size();
+        iconLabel = new Plasma::Label;
+        iconLabel->nativeWidget()->setPixmap(pix);
+        iconLabel->nativeWidget()->setFixedSize(size);
+        iconLabel->setMinimumSize(size);
+        iconLabel->setMaximumSize(size);
     }
 
-    mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    mTextLabel->setWordWrap(true);
 
-    int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
-    mTextLabel->setMinimumWidth(27 * averageCharWidth);
+    QFontMetrics fm = mTextLabel->nativeWidget()->fontMetrics();
+    mTextLabel->setMinimumWidth(27 * fm.averageCharWidth());
+    mTextLabel->setMinimumHeight(fm.height());
     updateTextLabel();
 
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
-    layout->setSpacing(KDialog::spacingHint());
+    // Layout
+    QGraphicsLinearLayout* layout = new QGraphicsLinearLayout(mContainer);
+    layout->setContentsMargins(0, 0, 0, 0);
     if (iconLabel) {
-        layout->addWidget(iconLabel);
-        layout->setAlignment(iconLabel, Qt::AlignHCenter | Qt::AlignTop);
+        layout->addItem(iconLabel);
     }
-    layout->addWidget(mTextLabel);
-    layout->setAlignment(mTextLabel, Qt::AlignLeft | Qt::AlignVCenter);
+    layout->addItem(mTextLabel);
+
+    mScene->addItem(mContainer);
+    setGraphicsWidget(mContainer);
+
+    syncToGraphicsWidget();
 
     // Behavior
     setWindowOpacity(0);
@@ -374,8 +381,7 @@ void NotificationWidget::start()
 
 QRect NotificationWidget::idealGeometry() const
 {
-    QSize sh = sizeHint();
-
+    QSize sh = mContainer->geometry().size().toSize();
     QRect rect = QApplication::desktop()->availableGeometry(mScreen);
     int left, top;
     if (mAlignment & Qt::AlignTop) {
@@ -394,34 +400,6 @@ QRect NotificationWidget::idealGeometry() const
     }
 
     return QRect(QPoint(left, top), sh);
-}
-
-void NotificationWidget::paintEvent(QPaintEvent*)
-{
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    mBackground->paintFrame(&painter, QPointF(0, 0));
-}
-
-void NotificationWidget::resizeEvent(QResizeEvent*)
-{
-    mBackground->resizeFrame(size());
-#if KDE_IS_VERSION(4, 5, 0)
-    if (Plasma::Theme::defaultTheme()->windowTranslucencyEnabled()) {
-        Plasma::WindowEffects::enableBlurBehind(winId(), true, mBackground->mask());
-        clearMask();
-    } else {
-        setMask(mBackground->mask());
-    }
-#else
-    setMask(mBackground->mask());
-#endif
-}
-
-void NotificationWidget::showEvent(QShowEvent* event)
-{
-    QWidget::showEvent(event);
-    Plasma::WindowEffects::overrideShadow(winId(), true);
 }
 
 void NotificationWidget::updateOpacity()
