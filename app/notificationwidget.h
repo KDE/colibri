@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 // KDE
 #include <Plasma/Dialog>
-#include <Plasma/Dialog>
 
 class QGraphicsScene;
 class QTimeLine;
@@ -38,6 +37,7 @@ class QTimer;
 
 namespace Plasma
 {
+class FrameSvg;
 class Label;
 }
 
@@ -146,6 +146,7 @@ private:
     QGraphicsScene* mScene;
     QGraphicsWidget* mContainer;
     Plasma::Label* mTextLabel;
+    Plasma::FrameSvg* mBackgroundSvg;
 
     uint mCloseReason;
     Qt::Alignment mAlignment;

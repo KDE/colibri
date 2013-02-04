@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <math.h>
 
 // X11
+#include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
 #include <fixx11h.h>
 
@@ -239,6 +240,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
 , mTextLabel(new Plasma::Label)
+, mBackgroundSvg(new Plasma::FrameSvg(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mScreen(-1)
@@ -251,6 +253,10 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     KWindowSystem::setState(winId(), NET::KeepAbove);
     KWindowSystem::setType(winId(), NET::Tooltip);
     setAttribute(Qt::WA_X11NetWmWindowTypeToolTip, true);
+
+    // Background. This is only used to get the dialog margins
+    mBackgroundSvg->setImagePath("dialogs/background");
+    mBackgroundSvg->setEnabledBorders(Plasma::FrameSvg::AllBorders);
 
     // Icon
     QPixmap pix = pixmapFromImage(image);
@@ -379,10 +385,45 @@ void NotificationWidget::start()
     mState->onStarted();
 }
 
+static bool getShadowMargins(WId id, int* left, int* top, int* right, int* bottom)
+{
+    static Atom shadowAtom = XInternAtom( QX11Info::display(), "_KDE_NET_WM_SHADOW", False);
+    Atom type;
+    int format, status;
+    unsigned long nitems = 0;
+    unsigned long extra = 0;
+    unsigned char *data = 0;
+    status = XGetWindowProperty(QX11Info::display(), id, shadowAtom, 0, 12, false, XA_CARDINAL, &type, &format, &nitems, &extra, &data);
+    bool ok = false;
+    if (status == Success && type == XA_CARDINAL && format == 32 && nitems == 12) {
+        long* shadow = reinterpret_cast< long* >(data);
+        *top = shadow[8];
+        *right = shadow[9];
+        *bottom = shadow[10];
+        *left = shadow[11];
+        ok = true;
+    }
+    if (data) {
+        XFree(data);
+    }
+    return ok;
+}
+
 QRect NotificationWidget::idealGeometry() const
 {
-    QSize sh = mContainer->geometry().size().toSize();
     QRect rect = QApplication::desktop()->availableGeometry(mScreen);
+    {
+        qreal left, top, right, bottom;
+        mBackgroundSvg->getMargins(left, top, right, bottom);
+        rect.adjust(int(left), int(top), -int(right), -int(bottom));
+    }
+    {
+        int left, top, right, bottom;
+        if (getShadowMargins(winId(), &left, &top, &right, &bottom)) {
+            rect.adjust(left, top, -right, -bottom);
+        }
+    }
+    QSize sh = mContainer->geometry().size().toSize();
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
