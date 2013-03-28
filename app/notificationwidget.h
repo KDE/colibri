@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 // KDE
 #include <Plasma/Dialog>
 
+class QGraphicsLinearLayout;
 class QGraphicsScene;
 class QTimeLine;
 class QTimer;
@@ -147,6 +148,7 @@ private:
     QGraphicsWidget* mContainer;
     Plasma::Label* mTextLabel;
     Plasma::FrameSvg* mBackgroundSvg;
+    QGraphicsLinearLayout* mLayout;
 
     uint mCloseReason;
     Qt::Alignment mAlignment;

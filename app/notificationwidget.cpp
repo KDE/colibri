@@ -287,12 +287,12 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     updateTextLabel();
 
     // Layout
-    QGraphicsLinearLayout* layout = new QGraphicsLinearLayout(mContainer);
-    layout->setContentsMargins(0, 0, 0, 0);
+    mLayout = new QGraphicsLinearLayout(mContainer);
+    mLayout->setContentsMargins(0, 0, 0, 0);
     if (iconLabel) {
-        layout->addItem(iconLabel);
+        mLayout->addItem(iconLabel);
     }
-    layout->addItem(mTextLabel);
+    mLayout->addItem(mTextLabel);
 
     mScene->addItem(mContainer);
     setGraphicsWidget(mContainer);
@@ -412,10 +412,12 @@ static bool getShadowMargins(WId id, int* left, int* top, int* right, int* botto
 QRect NotificationWidget::idealGeometry() const
 {
     QRect rect = QApplication::desktop()->availableGeometry(mScreen);
+    QSize sh = mLayout->sizeHint(Qt::PreferredSize, QSizeF()).toSize();
     {
         qreal left, top, right, bottom;
         mBackgroundSvg->getMargins(left, top, right, bottom);
-        rect.adjust(int(left), int(top), -int(right), -int(bottom));
+        sh.rwidth() += int(left + right);
+        sh.rheight() += int(top + bottom);
     }
     {
         int left, top, right, bottom;
@@ -423,7 +425,6 @@ QRect NotificationWidget::idealGeometry() const
             rect.adjust(left, top, -right, -bottom);
         }
     }
-    QSize sh = mContainer->geometry().size().toSize();
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
@@ -439,7 +440,6 @@ QRect NotificationWidget::idealGeometry() const
     } else {
         left = rect.right() - sh.width();
     }
-
     return QRect(QPoint(left, top), sh);
 }
 
