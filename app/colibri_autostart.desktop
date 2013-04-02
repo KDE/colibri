@@ -2,6 +2,7 @@
 Name=Colibri
 Name[cs]=Colibri
 Name[de]=Colibri
+Name[es]=Colibri
 Name[et]=Colibri
 Name[fr]=Colibri
 Name[nl]=Colibri
@@ -18,6 +19,7 @@ Type=Application
 Comment=Colibri autostart at login
 Comment[cs]=Automatické spouštění Colibri při startu
 Comment[de]=Autostart von Colibri bei der Anmeldung
+Comment[es]=Inicio automático de Colibri al iniciar sesión
 Comment[et]=Colibri automaatne käivitamine sisselogimisel
 Comment[fr]=Démarrage automatique de Colibri à la connexion
 Comment[nl]=Colibri automatisch starten bij aanmelden
