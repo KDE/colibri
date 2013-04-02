@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 
 // KDE
 #include <KAboutData>
-#include <KColorScheme>
 #include <KPluginFactory>
 #include <KProcess>
 
@@ -56,6 +55,7 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
 : KCModule(ColibriModuleFactory::componentData(), parent)
 , mConfig(new Config)
 , mUi(new Ui::ControlModule)
+, mStartAction(new QAction(this))
 , mLastPreviewId(0)
 {
     KGlobal::locale()->insertCatalog("colibri");
@@ -64,16 +64,17 @@ ControlModule::ControlModule(QWidget* parent, const QVariantList&)
     setAboutData(about);
 
     mUi->setupUi(this);
-    // Fix height so that it does not grow or shrink depending on the visibility of the "Start" button
-    mUi->stateContainer->setFixedHeight(mUi->stateContainer->sizeHint().height());
+    mUi->messageWidget->setCloseButtonVisible(false);
 
     addConfig(mConfig, this);
 
+    mStartAction->setText(i18n("Start Colibri"));
+    mStartAction->setToolTip(i18n("Start the Colibri notification system"));
+    connect(mStartAction, SIGNAL(triggered()),
+        SLOT(startColibri()));
+
     connect(mUi->alignmentSelector, SIGNAL(changed(Qt::Alignment)),
         SLOT(updateUnmanagedWidgetChangeState()));
-
-    connect(mUi->startButton, SIGNAL(clicked()),
-        SLOT(startColibri()));
 
     connect(mUi->previewButton, SIGNAL(clicked()),
         SLOT(preview()));
@@ -149,16 +150,15 @@ static QString getCurrentService()
 void ControlModule::updateStateInformation()
 {
     QString service = getCurrentService();
-    QString icon;
     QString text;
     bool showStartButton = false;
     bool colibriIsRunning = false;
     if (service == "colibri") {
-        icon = "dialog-ok";
+        mUi->messageWidget->setMessageType(KMessageWidget::Positive);
         text = i18n("Colibri is running.");
         colibriIsRunning = true;
     } else {
-        icon = "dialog-warning";
+        mUi->messageWidget->setMessageType(KMessageWidget::Error);
         if (service.isEmpty()) {
             text = i18n("No notification system is running.");
             showStartButton = true;
@@ -166,40 +166,28 @@ void ControlModule::updateStateInformation()
             text = i18n("The current notification system is %1. You must stop it to be able to start Colibri.", service);
         }
     }
+    mUi->messageWidget->setText(text);
 
-    // Adjust palette
-    KColorScheme scheme(QPalette::Active, KColorScheme::Window);
-    QBrush bg = scheme.background(colibriIsRunning ? KColorScheme::PositiveBackground : KColorScheme::NegativeBackground);
-    QBrush fg = scheme.foreground(colibriIsRunning ? KColorScheme::PositiveText : KColorScheme::NegativeText);
-    mUi->stateContainer->setStyleSheet(
-        QString(".QFrame {"
-            "background-color: %1;"
-            "border-radius: 3px;"
-            "border: 1px solid %2;"
-            "}"
-            ".QLabel { color: %2; }"
-            )
-        .arg(bg.color().name())
-        .arg(fg.color().name())
-        );
+    if (showStartButton) {
+        mUi->messageWidget->addAction(mStartAction);
+    } else {
+        mUi->messageWidget->removeAction(mStartAction);
+    }
 
-    mUi->stateIconLabel->setPixmap(KIcon(icon).pixmap(22));
-    mUi->stateTextLabel->setText(text);
-    mUi->startButton->setVisible(showStartButton);
     mUi->previewButton->setEnabled(colibriIsRunning);
     mUi->previewImpossibleLabel->setVisible(!colibriIsRunning);
 
-    // Hide the stateContainer if Colibri is running. If we come from a
+    // Hide the messageWidget if Colibri is running. If we come from a
     // slot (ie, we came because the dbus service changed), hide it after a
     // delay. If we come from the constructor, hide it immediatly.
     if (colibriIsRunning) {
         if (sender()) {
-            QTimer::singleShot(1000, mUi->stateContainer, SLOT(hide()));
+            QTimer::singleShot(2000, mUi->messageWidget, SLOT(animatedHide()));
         } else {
-            mUi->stateContainer->hide();
+            mUi->messageWidget->hide();
         }
     } else {
-        mUi->stateContainer->show();
+        mUi->messageWidget->show();
     }
 }
 
