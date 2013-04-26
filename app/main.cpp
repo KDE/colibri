@@ -24,14 +24,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <KCmdLineArgs>
 #include <KLocale>
 
-// Locale
+// Qt
+#include <QScopedPointer>
+
+// Local
 #include "notificationmanager.h"
 #include "about.h"
 
 int main(int argc, char **argv)
 {
-    KAboutData* about = createAboutData();
-    KCmdLineArgs::init(argc, argv, about);
+    QScopedPointer<KAboutData> about(createAboutData());
+    KCmdLineArgs::init(argc, argv, about.data());
 
     KCmdLineOptions options;
     options.add("single", ki18n("Quit after one popup. Only useful when running with Valgrind"));
