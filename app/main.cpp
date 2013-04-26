@@ -33,8 +33,13 @@ int main(int argc, char **argv)
     KAboutData* about = createAboutData();
     KCmdLineArgs::init(argc, argv, about);
 
+    KCmdLineOptions options;
+    options.add("single", ki18n("Quit after one popup. Only useful when running with Valgrind"));
+    KCmdLineArgs::addCmdLineOptions(options);
+    KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
+
     KApplication app;
-    app.setQuitOnLastWindowClosed(false);
+    app.setQuitOnLastWindowClosed(args->isSet("single"));
     Colibri::NotificationManager manager;
     if (!manager.connectOnDBus()) {
         return 1;
