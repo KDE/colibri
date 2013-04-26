@@ -34,6 +34,7 @@ int main(int argc, char **argv)
     KCmdLineArgs::init(argc, argv, about);
 
     KApplication app;
+    app.setQuitOnLastWindowClosed(false);
     Colibri::NotificationManager manager;
     if (!manager.connectOnDBus()) {
         return 1;

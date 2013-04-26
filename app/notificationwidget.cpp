@@ -231,7 +231,7 @@ static QPixmap pixmapFromAppIcon(const QString& appIcon)
 // NotificationWidget
 ////////////////////////////////////////////////////:
 NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout)
-: Plasma::Dialog(0, Qt::ToolTip)
+: Plasma::Dialog(0)
 , mAppName(appName)
 , mId(id)
 , mSummary(summary)
@@ -249,10 +249,9 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mFadeOpacity(1.)
 , mMouseOverOpacity(1.)
 {
-    //Setup the window properties
-    KWindowSystem::setState(winId(), NET::KeepAbove);
-    KWindowSystem::setType(winId(), NET::Tooltip);
-    setAttribute(Qt::WA_X11NetWmWindowTypeToolTip, true);
+    // Setup the window properties
+    KWindowSystem::setState(winId(), NET::KeepAbove | NET::SkipTaskbar);
+    KWindowSystem::setType(winId(), NET::Notification);
 
     // Background. This is only used to get the dialog margins
     mBackgroundSvg->setImagePath("dialogs/background");
