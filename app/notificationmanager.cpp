@@ -254,6 +254,10 @@ void NotificationManager::slotNotificationWidgetClosed(uint id, uint reason)
         return;
     }
     NotificationWidget* widget = mWidgets.takeFirst();
+
+    // Hack to workaround blinking when the notification is fading out
+    // See https://bugs.kde.org/show_bug.cgi?id=314427
+    widget->move(-widget->width(), 0);
     widget->deleteLater();
 
     if (!mWidgets.isEmpty()) {

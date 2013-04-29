@@ -20,22 +20,24 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA.
 
 */
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef ABOUT_H
+#define ABOUT_H
+
+#include <buildconfig.h>
 
 static const char* DESCRIPTION = I18N_NOOP("Light notification system for KDE4");
-static const char* VERSION = "0.2.2";
 
 KAboutData* createAboutData()
 {
     KAboutData* about = new KAboutData(
         "colibri", 0, ki18n("Colibri"),
-        VERSION, ki18n(DESCRIPTION),
+        COLIBRI_VERSION,
+        ki18n(DESCRIPTION),
         KAboutData::License_GPL,
-        ki18n("(C) 2009-2010 Aurélien Gâteau"),
+        ki18n("(C) 2009-2013 Aurélien Gâteau"),
         KLocalizedString(), 0, "agateau@kde.org");
     about->addAuthor(ki18n("Aurélien Gâteau"), KLocalizedString(), "agateau@kde.org");
     return about;
 }
 
-#endif /* VERSION_H */
+#endif /* ABOUT_H */

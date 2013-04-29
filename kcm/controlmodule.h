@@ -56,6 +56,7 @@ private Q_SLOTS:
 private:
     Config* mConfig;
     Ui::ControlModule* mUi;
+    QAction* mStartAction;
     uint mLastPreviewId;
 };
 

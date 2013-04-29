@@ -23,23 +23,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #ifndef NOTIFICATIONWIDGET_H
 #define NOTIFICATIONWIDGET_H
 
+// Qt
 #include <QPropertyAnimation>
 #include <QScopedPointer>
 #include <QWidget>
 
-class QLabel;
+// KDE
+#include <Plasma/Dialog>
+
+class QGraphicsLinearLayout;
+class QGraphicsScene;
 class QTimeLine;
 class QTimer;
 
 namespace Plasma
 {
 class FrameSvg;
+class Label;
 }
 
 namespace Colibri
 {
-
-class Label;
 
 class NotificationWidget;
 
@@ -92,9 +96,9 @@ private Q_SLOTS:
 };
 
 /**
- * A widget which shows an notification
+ * A widget which shows a notification
  */
-class NotificationWidget : public QWidget
+class NotificationWidget : public Plasma::Dialog
 {
     Q_OBJECT
 public:
@@ -129,11 +133,6 @@ public:
 Q_SIGNALS:
     void closed(uint id, uint reason);
 
-protected:
-    virtual void paintEvent(QPaintEvent*);
-    virtual void resizeEvent(QResizeEvent*);
-    virtual void showEvent(QShowEvent*);
-
 private Q_SLOTS:
     void updateOpacity();
     void updateMouseOverOpacity();
@@ -145,12 +144,15 @@ private:
     QString mBody;
     QTimeLine* mVisibleTimeLine;
 
-    Label* mTextLabel;
+    QGraphicsScene* mScene;
+    QGraphicsWidget* mContainer;
+    Plasma::Label* mTextLabel;
+    Plasma::FrameSvg* mBackgroundSvg;
+    QGraphicsLinearLayout* mLayout;
 
     uint mCloseReason;
     Qt::Alignment mAlignment;
     int mScreen;
-    Plasma::FrameSvg* mBackground;
 
     State* mState;
 

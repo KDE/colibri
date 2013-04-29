@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <math.h>
 
 // X11
+#include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
 #include <fixx11h.h>
 
@@ -33,29 +34,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <QApplication>
 #include <QCursor>
 #include <QDesktopWidget>
-#include <QHBoxLayout>
+#include <QGraphicsLinearLayout>
+#include <QGraphicsWidget>
 #include <QLabel>
-#include <QPainter>
-#include <QPaintEvent>
 #include <QTimeLine>
 #include <QTimer>
 #include <QX11Info>
 
 // KDE
 #include <KDebug>
-#include <KDialog>
+#include <KIconLoader>
 #include <KWindowSystem>
 
 #include <Plasma/FrameSvg>
+#include <Plasma/Label>
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
 // Local
-#include "label.h"
-
-// Enable this to quit colibri after one notification. Useful for memchecking
-// with Valgrind.
-//#define QUIT_AFTER_ONE
 
 namespace Colibri
 {
@@ -202,89 +198,101 @@ static QString cleanBody(const QString& _body)
     return "<div>" + body + "</div>";
 }
 
+static QPixmap pixmapFromImage(const QImage& image_)
+{
+    if (image_.isNull()) {
+        return QPixmap();
+    }
+    QImage image = image_;
+    if (qMax(image.width(), image.height()) > ICON_SIZE) {
+        image = image.scaled(ICON_SIZE, ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+    return QPixmap::fromImage(image);
+}
+
+static QPixmap pixmapFromAppIcon(const QString& appIcon)
+{
+    if (appIcon.isEmpty()) {
+        return QPixmap();
+    }
+    return KIconLoader::global()->loadIcon(appIcon, KIconLoader::Panel,
+        ICON_SIZE,
+        KIconLoader::DefaultState,
+        QStringList() /* overlays */,
+        0L /* path_store */,
+        true /* canReturnNull */);
+}
+
 ////////////////////////////////////////////////////:
 // NotificationWidget
 ////////////////////////////////////////////////////:
-NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image_, const QString& appIcon, const QString& summary, const QString& body, int timeout)
-: mAppName(appName)
+NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout)
+: Plasma::Dialog(0)
+, mAppName(appName)
 , mId(id)
 , mSummary(summary)
 , mBody(cleanBody(body))
 , mVisibleTimeLine(new QTimeLine(timeout, this))
-, mTextLabel(new Label(this))
+, mScene(new QGraphicsScene(this))
+, mContainer(new QGraphicsWidget)
+, mTextLabel(new Plasma::Label)
+, mBackgroundSvg(new Plasma::FrameSvg(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
 , mScreen(-1)
-, mBackground(new Plasma::FrameSvg(this))
 , mState(new HiddenState(this))
 , mMousePollTimer(new QTimer(this))
 , mFadeOpacity(1.)
 , mMouseOverOpacity(1.)
 {
+    // Setup the window properties
+    KWindowSystem::setState(winId(), NET::KeepAbove | NET::SkipTaskbar);
+    KWindowSystem::setType(winId(), NET::Notification);
+
+    // Background. This is only used to get the dialog margins
+    mBackgroundSvg->setImagePath("dialogs/background");
+    mBackgroundSvg->setEnabledBorders(Plasma::FrameSvg::AllBorders);
+
     // Icon
-    QPixmap pix;
-    if (!image_.isNull()) {
-        QImage image = image_;
-        if (qMax(image.width(), image.height()) > ICON_SIZE) {
-            image = image.scaled(ICON_SIZE, ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
-        pix = QPixmap::fromImage(image);
-    } else if (!appIcon.isEmpty()) {
-        pix = KIconLoader::global()->loadIcon(appIcon, KIconLoader::Panel,
-            ICON_SIZE,
-            KIconLoader::DefaultState,
-            QStringList() /* overlays */,
-            0L /* path_store */,
-            true /* canReturnNull */);
+    QPixmap pix = pixmapFromImage(image);
+    if (pix.isNull()) {
+        pix = pixmapFromAppIcon(appIcon);
     }
 
     // UI
-    setWindowFlags(Qt::Tool | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAutoFillBackground(false);
-
     setMinimumHeight(DEFAULT_BUBBLE_MIN_HEIGHT);
 
-    mBackground->setImagePath("widgets/tooltip");
-    const int topHeight = mBackground->marginSize(Plasma::TopMargin);
-    const int leftWidth = mBackground->marginSize(Plasma::LeftMargin) + Label::HaloMargin;
-    const int rightWidth = mBackground->marginSize(Plasma::RightMargin) + Label::HaloMargin;
-    const int bottomHeight = mBackground->marginSize(Plasma::BottomMargin);
-    setContentsMargins(leftWidth, topHeight, rightWidth, bottomHeight);
-
-    QLabel* iconLabel;
+    Plasma::Label* iconLabel;
     if (pix.isNull()) {
         iconLabel = 0;
     } else {
-        iconLabel = new QLabel(this);
-        iconLabel->setAlignment(Qt::AlignCenter);
-        iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-        // Translate the pixmap 'Label::HaloMargin' pixels down so that it's
-        // aligned with the text content
-        QPixmap pix2(pix.width(), pix.height() + 2 * Label::HaloMargin);
-        pix2.fill(Qt::transparent);
-        QPainter painter(&pix2);
-        painter.drawPixmap(0, Label::HaloMargin, pix);
-        painter.end();
-        iconLabel->setPixmap(pix2);
+        QSize size = pix.size();
+        iconLabel = new Plasma::Label;
+        iconLabel->nativeWidget()->setPixmap(pix);
+        iconLabel->nativeWidget()->setFixedSize(size);
+        iconLabel->setMinimumSize(size);
+        iconLabel->setMaximumSize(size);
     }
 
-    mTextLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+    mTextLabel->setWordWrap(true);
 
-    int averageCharWidth = mTextLabel->fontMetrics().averageCharWidth();
-    mTextLabel->setMinimumWidth(27 * averageCharWidth);
+    QFontMetrics fm = mTextLabel->nativeWidget()->fontMetrics();
+    mTextLabel->setMinimumWidth(27 * fm.averageCharWidth());
+    mTextLabel->setMinimumHeight(fm.height());
     updateTextLabel();
 
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->setMargin(0);
-    layout->setSpacing(KDialog::spacingHint());
+    // Layout
+    mLayout = new QGraphicsLinearLayout(mContainer);
+    mLayout->setContentsMargins(0, 0, 0, 0);
     if (iconLabel) {
-        layout->addWidget(iconLabel);
-        layout->setAlignment(iconLabel, Qt::AlignHCenter | Qt::AlignTop);
+        mLayout->addItem(iconLabel);
     }
-    layout->addWidget(mTextLabel);
-    layout->setAlignment(mTextLabel, Qt::AlignLeft | Qt::AlignVCenter);
+    mLayout->addItem(mTextLabel);
+
+    mScene->addItem(mContainer);
+    setGraphicsWidget(mContainer);
+
+    syncToGraphicsWidget();
 
     // Behavior
     setWindowOpacity(0);
@@ -309,7 +317,7 @@ void NotificationWidget::updateTextLabel()
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
-    mBody += "<br/>" + cleanBody(body);
+    mBody += cleanBody(body);
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     updateTextLabel();
     if (isVisible()) {
@@ -372,11 +380,46 @@ void NotificationWidget::start()
     mState->onStarted();
 }
 
+static bool getShadowMargins(WId id, int* left, int* top, int* right, int* bottom)
+{
+    static Atom shadowAtom = XInternAtom( QX11Info::display(), "_KDE_NET_WM_SHADOW", False);
+    Atom type;
+    int format, status;
+    unsigned long nitems = 0;
+    unsigned long extra = 0;
+    unsigned char *data = 0;
+    status = XGetWindowProperty(QX11Info::display(), id, shadowAtom, 0, 12, false, XA_CARDINAL, &type, &format, &nitems, &extra, &data);
+    bool ok = false;
+    if (status == Success && type == XA_CARDINAL && format == 32 && nitems == 12) {
+        long* shadow = reinterpret_cast< long* >(data);
+        *top = shadow[8];
+        *right = shadow[9];
+        *bottom = shadow[10];
+        *left = shadow[11];
+        ok = true;
+    }
+    if (data) {
+        XFree(data);
+    }
+    return ok;
+}
+
 QRect NotificationWidget::idealGeometry() const
 {
-    QSize sh = sizeHint();
-
     QRect rect = QApplication::desktop()->availableGeometry(mScreen);
+    QSize sh = mLayout->sizeHint(Qt::PreferredSize, QSizeF()).toSize();
+    {
+        qreal left, top, right, bottom;
+        mBackgroundSvg->getMargins(left, top, right, bottom);
+        sh.rwidth() += int(left + right);
+        sh.rheight() += int(top + bottom);
+    }
+    {
+        int left, top, right, bottom;
+        if (getShadowMargins(winId(), &left, &top, &right, &bottom)) {
+            rect.adjust(left, top, -right, -bottom);
+        }
+    }
     int left, top;
     if (mAlignment & Qt::AlignTop) {
         top = rect.top();
@@ -392,36 +435,7 @@ QRect NotificationWidget::idealGeometry() const
     } else {
         left = rect.right() - sh.width();
     }
-
     return QRect(QPoint(left, top), sh);
-}
-
-void NotificationWidget::paintEvent(QPaintEvent*)
-{
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    mBackground->paintFrame(&painter, QPointF(0, 0));
-}
-
-void NotificationWidget::resizeEvent(QResizeEvent*)
-{
-    mBackground->resizeFrame(size());
-#if KDE_IS_VERSION(4, 5, 0)
-    if (Plasma::Theme::defaultTheme()->windowTranslucencyEnabled()) {
-        Plasma::WindowEffects::enableBlurBehind(winId(), true, mBackground->mask());
-        clearMask();
-    } else {
-        setMask(mBackground->mask());
-    }
-#else
-    setMask(mBackground->mask());
-#endif
-}
-
-void NotificationWidget::showEvent(QShowEvent* event)
-{
-    QWidget::showEvent(event);
-    Plasma::WindowEffects::overrideShadow(winId(), true);
 }
 
 void NotificationWidget::updateOpacity()
@@ -494,9 +508,6 @@ void NotificationWidget::updateMouseOverOpacity()
 void NotificationWidget::emitClosed()
 {
     emit closed(mId, mCloseReason);
-#ifdef QUIT_AFTER_ONE
-    QCoreApplication::exit();
-#endif
 }
 
 } // namespace
