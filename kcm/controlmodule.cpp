@@ -206,7 +206,7 @@ void ControlModule::preview()
         "kcmcolibri",                       // appname
         mLastPreviewId,                     // replacesId
         "preferences-desktop-notification", // appIcon
-        i18n("Preview"),                    // summary
+        i18nc("@title", "Preview"),         // summary
         i18n("This is a preview of a Colibri notification"),
         QStringList(),                      // actions
         QVariantMap(),                      // hints
