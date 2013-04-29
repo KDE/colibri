@@ -1,17 +1,24 @@
 - Update NEWS
   r!git log --pretty=format:'- \%s (\%an)' x.y.z-1..HEAD
-- Bump version number in CMakeLists.txt and in app/about.h
+
+- Bump version number in CMakeLists.txt
+
 - Commit
+
 - Create tarball and check it builds
   make distcheck
+
 - If ok, create "x.y.z" tag
   git tag -a x.y.z
+
 - Push
   git push
   git push --tags
 
 - Add new version number on https://bugs.kde.org
+
 - Update PPA
 
 - Upload on http://kde-apps.org
+
 - Blog
