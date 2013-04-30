@@ -68,6 +68,8 @@ static const int GROW_ANIMATION_DURATION = 200;
 
 static const int ICON_SIZE = KIconLoader::SizeMedium;
 
+static const int ICON_TEXT_SPACING = 6;
+
 // 60 FPS to ensure a smooth animation
 static const int MOUSE_POLL_INTERVAL = 1000 / 60;
 
@@ -235,7 +237,8 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mVisibleTimeLine(new QTimeLine(timeout, this))
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
-, mTextLabel(new Plasma::Label)
+, mIconLabel(0)
+, mTextLabel(new Plasma::Label(mContainer))
 , mBackgroundSvg(new Plasma::FrameSvg(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
@@ -262,16 +265,13 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     // UI
     setMinimumHeight(DEFAULT_BUBBLE_MIN_HEIGHT);
 
-    Plasma::Label* iconLabel;
-    if (pix.isNull()) {
-        iconLabel = 0;
-    } else {
+    if (!pix.isNull()) {
         QSize size = pix.size();
-        iconLabel = new Plasma::Label;
-        iconLabel->nativeWidget()->setPixmap(pix);
-        iconLabel->nativeWidget()->setFixedSize(size);
-        iconLabel->setMinimumSize(size);
-        iconLabel->setMaximumSize(size);
+        mIconLabel = new Plasma::Label(mContainer);
+        mIconLabel->nativeWidget()->setPixmap(pix);
+        mIconLabel->nativeWidget()->setFixedSize(size);
+        mIconLabel->setMinimumSize(size);
+        mIconLabel->setMaximumSize(size);
     }
 
     mTextLabel->setWordWrap(true);
@@ -282,12 +282,9 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     updateTextLabel();
 
     // Layout
-    mLayout = new QGraphicsLinearLayout(mContainer);
-    mLayout->setContentsMargins(0, 0, 0, 0);
-    if (iconLabel) {
-        mLayout->addItem(iconLabel);
+    if (mIconLabel) {
+        mTextLabel->setX(mIconLabel->minimumSize().width() + ICON_TEXT_SPACING);
     }
-    mLayout->addItem(mTextLabel);
 
     mScene->addItem(mContainer);
     setGraphicsWidget(mContainer);
@@ -313,6 +310,7 @@ void NotificationWidget::updateTextLabel()
         text += mBody;
     }
     mTextLabel->setText(text);
+    mTextLabel->resize(mTextLabel->preferredSize());
 }
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
@@ -406,14 +404,29 @@ static bool getShadowMargins(WId id, int* left, int* top, int* right, int* botto
 
 QRect NotificationWidget::idealGeometry() const
 {
-    QRect rect = QApplication::desktop()->availableGeometry(mScreen);
-    QSize sh = mLayout->sizeHint(Qt::PreferredSize, QSizeF()).toSize();
+    QSize sh;
+    // Compute content size
+    {
+        QSize textSize = mTextLabel->preferredSize().toSize();
+        if (mIconLabel) {
+            QSize iconSize = mIconLabel->size().toSize();
+            sh = QSize(
+                iconSize.width() + ICON_TEXT_SPACING + textSize.width(),
+                qMax(iconSize.height(), textSize.height())
+                );
+        } else {
+            sh = textSize;
+        }
+    }
+    // Take bg margins into account
     {
         qreal left, top, right, bottom;
         mBackgroundSvg->getMargins(left, top, right, bottom);
         sh.rwidth() += int(left + right);
         sh.rheight() += int(top + bottom);
     }
+    // Compute position
+    QRect rect = QApplication::desktop()->availableGeometry(mScreen);
     {
         int left, top, right, bottom;
         if (getShadowMargins(winId(), &left, &top, &right, &bottom)) {
