@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 */
 #include "notificationwidget.h"
 
+// Local
+#include <hlayout.h>
+
 // libc
 #include <math.h>
 
@@ -51,8 +54,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
 
-// Local
-
 namespace Colibri
 {
 
@@ -67,6 +68,8 @@ static const int DEFAULT_FADE_OUT_TIMEOUT  = 1000;
 static const int GROW_ANIMATION_DURATION = 200;
 
 static const int ICON_SIZE = KIconLoader::SizeMedium;
+
+static const int ICON_TEXT_SPACING = 6;
 
 // 60 FPS to ensure a smooth animation
 static const int MOUSE_POLL_INTERVAL = 1000 / 60;
@@ -235,7 +238,9 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mVisibleTimeLine(new QTimeLine(timeout, this))
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
-, mTextLabel(new Plasma::Label)
+, mHLayout(new HLayout(mContainer))
+, mIconLabel(0)
+, mTextLabel(new Plasma::Label(mContainer))
 , mBackgroundSvg(new Plasma::FrameSvg(this))
 , mCloseReason(CLOSE_REASON_EXPIRED)
 , mAlignment(Qt::AlignRight | Qt::AlignTop)
@@ -262,16 +267,13 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     // UI
     setMinimumHeight(DEFAULT_BUBBLE_MIN_HEIGHT);
 
-    Plasma::Label* iconLabel;
-    if (pix.isNull()) {
-        iconLabel = 0;
-    } else {
+    if (!pix.isNull()) {
         QSize size = pix.size();
-        iconLabel = new Plasma::Label;
-        iconLabel->nativeWidget()->setPixmap(pix);
-        iconLabel->nativeWidget()->setFixedSize(size);
-        iconLabel->setMinimumSize(size);
-        iconLabel->setMaximumSize(size);
+        mIconLabel = new Plasma::Label(mContainer);
+        mIconLabel->nativeWidget()->setPixmap(pix);
+        mIconLabel->nativeWidget()->setFixedSize(size);
+        mIconLabel->setMinimumSize(size);
+        mIconLabel->setMaximumSize(size);
     }
 
     mTextLabel->setWordWrap(true);
@@ -282,12 +284,11 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     updateTextLabel();
 
     // Layout
-    mLayout = new QGraphicsLinearLayout(mContainer);
-    mLayout->setContentsMargins(0, 0, 0, 0);
-    if (iconLabel) {
-        mLayout->addItem(iconLabel);
+    if (mIconLabel) {
+        mHLayout->addWidget(mIconLabel);
+        mHLayout->setSpacing(ICON_TEXT_SPACING);
     }
-    mLayout->addItem(mTextLabel);
+    mHLayout->addWidget(mTextLabel);
 
     mScene->addItem(mContainer);
     setGraphicsWidget(mContainer);
@@ -313,6 +314,8 @@ void NotificationWidget::updateTextLabel()
         text += mBody;
     }
     mTextLabel->setText(text);
+    mTextLabel->resize(mTextLabel->preferredSize());
+    mHLayout->update();
 }
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
@@ -374,6 +377,7 @@ void NotificationWidget::start()
     if (mScreen == -1) {
         mScreen = QApplication::desktop()->screenNumber(QCursor::pos());
     }
+    mHLayout->update();
     setGeometry(idealGeometry());
     show();
     mMousePollTimer->start();
@@ -406,14 +410,17 @@ static bool getShadowMargins(WId id, int* left, int* top, int* right, int* botto
 
 QRect NotificationWidget::idealGeometry() const
 {
-    QRect rect = QApplication::desktop()->availableGeometry(mScreen);
-    QSize sh = mLayout->sizeHint(Qt::PreferredSize, QSizeF()).toSize();
+    QSize sh = mContainer->size().toSize();
+
+    // Take bg margins into account
     {
         qreal left, top, right, bottom;
         mBackgroundSvg->getMargins(left, top, right, bottom);
         sh.rwidth() += int(left + right);
         sh.rheight() += int(top + bottom);
     }
+    // Compute position
+    QRect rect = QApplication::desktop()->availableGeometry(mScreen);
     {
         int left, top, right, bottom;
         if (getShadowMargins(winId(), &left, &top, &right, &bottom)) {
