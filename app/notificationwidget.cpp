@@ -279,7 +279,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mTextLabel->setWordWrap(true);
 
     QFontMetrics fm = mTextLabel->nativeWidget()->fontMetrics();
-    mTextLabel->setMinimumWidth(27 * fm.averageCharWidth());
+    mTextLabel->setMinimumWidth(20 * fm.averageCharWidth());
     mTextLabel->setMinimumHeight(fm.height());
     updateTextLabel();
 
