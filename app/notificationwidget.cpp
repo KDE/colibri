@@ -322,6 +322,8 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
     mBody += cleanBody(body);
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
+    kDebug() << "timeout:" << timeout << "new duration:" << mVisibleTimeLine->duration();
+    kDebug() << "body:" << mBody;
     updateTextLabel();
     if (isVisible()) {
         mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
