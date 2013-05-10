@@ -35,6 +35,8 @@ class QGraphicsScene;
 class QTimeLine;
 class QTimer;
 
+class HLayout;
+
 namespace Plasma
 {
 class FrameSvg;
@@ -145,6 +147,7 @@ private:
 
     QGraphicsScene* mScene;
     QGraphicsWidget* mContainer;
+    QScopedPointer<HLayout> mHLayout;
     Plasma::Label* mIconLabel;
     Plasma::Label* mTextLabel;
     Plasma::FrameSvg* mBackgroundSvg;

@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 */
 #include "notificationwidget.h"
 
+// Local
+#include <hlayout.h>
+
 // libc
 #include <math.h>
 
@@ -50,8 +53,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 #include <Plasma/Label>
 #include <Plasma/Theme>
 #include <Plasma/WindowEffects>
-
-// Local
 
 namespace Colibri
 {
@@ -237,6 +238,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mVisibleTimeLine(new QTimeLine(timeout, this))
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
+, mHLayout(new HLayout(mContainer))
 , mIconLabel(0)
 , mTextLabel(new Plasma::Label(mContainer))
 , mBackgroundSvg(new Plasma::FrameSvg(this))
@@ -283,8 +285,10 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 
     // Layout
     if (mIconLabel) {
-        mTextLabel->setX(mIconLabel->minimumSize().width() + ICON_TEXT_SPACING);
+        mHLayout->addWidget(mIconLabel);
+        mHLayout->setSpacing(ICON_TEXT_SPACING);
     }
+    mHLayout->addWidget(mTextLabel);
 
     mScene->addItem(mContainer);
     setGraphicsWidget(mContainer);
@@ -311,6 +315,7 @@ void NotificationWidget::updateTextLabel()
     }
     mTextLabel->setText(text);
     mTextLabel->resize(mTextLabel->preferredSize());
+    mHLayout->update();
 }
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
@@ -372,6 +377,7 @@ void NotificationWidget::start()
     if (mScreen == -1) {
         mScreen = QApplication::desktop()->screenNumber(QCursor::pos());
     }
+    mHLayout->update();
     setGeometry(idealGeometry());
     show();
     mMousePollTimer->start();
@@ -404,20 +410,8 @@ static bool getShadowMargins(WId id, int* left, int* top, int* right, int* botto
 
 QRect NotificationWidget::idealGeometry() const
 {
-    QSize sh;
-    // Compute content size
-    {
-        QSize textSize = mTextLabel->preferredSize().toSize();
-        if (mIconLabel) {
-            QSize iconSize = mIconLabel->size().toSize();
-            sh = QSize(
-                iconSize.width() + ICON_TEXT_SPACING + textSize.width(),
-                qMax(iconSize.height(), textSize.height())
-                );
-        } else {
-            sh = textSize;
-        }
-    }
+    QSize sh = mContainer->size().toSize();
+
     // Take bg margins into account
     {
         qreal left, top, right, bottom;
