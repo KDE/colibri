@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE
 
 // Qt
+#include <QApplication>
 #include <QGraphicsWidget>
 
 HLayout::HLayout(QGraphicsWidget* parent)
@@ -35,7 +36,11 @@ HLayout::HLayout(QGraphicsWidget* parent)
 
 void HLayout::addWidget(QGraphicsWidget* item)
 {
-    mItems.append(item);
+    if (QApplication::isLeftToRight()) {
+        mItems.append(item);
+    } else {
+        mItems.insert(0, item);
+    }
     item->setParentItem(mParent);
 }
 
