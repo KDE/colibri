@@ -1,6 +1,6 @@
 project(colibri)
 cmake_minimum_required(VERSION 2.6)
-set(COLIBRI_VERSION "0.2.2")
+set(COLIBRI_VERSION "0.3.0")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 

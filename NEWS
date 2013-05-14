@@ -1,3 +1,9 @@
+# 2013.05.14 - 0.3.0
+- Refactored to use Plasma::Dialog, bringing back shadows
+- Use KMessageWidget in KCM
+- Remove blank lines between concatenated notifications
+- Add test shell scripts
+
 # 2011.09.25 - 0.2.2
 ## Fixes
 - Plug three small mem leaks. Should also fix a rare crasher. (Aurélien Gâteau)
