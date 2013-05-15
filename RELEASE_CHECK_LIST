@@ -67,8 +67,13 @@ Upload to download.kde.org, following instructions from:
 Add new version number on:
 <https://bugs.kde.org/editversions.cgi?product=colibri>
 
-Update PPA
+Update project page:
+<http://agateau.com/projects/colibri>
 
-Upload on http://kde-apps.org
+Update PPA:
+<https://launchpad.net/~agateau/+archive/colibri/>
+
+Update kde-apps.org:
+<http://kde-apps.org/content/show.php/Colibri?content=117147>
 
 Blog
