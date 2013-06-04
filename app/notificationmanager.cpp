@@ -39,6 +39,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Cambridge, MA 02110-1301, USA
 namespace Colibri
 {
 
+static QString cleanBody(const QString& _body)
+{
+    QString body = _body;
+    if (body.startsWith("<qt>", Qt::CaseInsensitive)) {
+        body = body.mid(4);
+    } else if (body.startsWith("<html>", Qt::CaseInsensitive)) {
+        body = body.mid(6);
+    }
+    if (body.endsWith("</qt>", Qt::CaseInsensitive)) {
+        body.chop(5);
+    } else if (body.endsWith("</html>", Qt::CaseInsensitive)) {
+        body.chop(6);
+    }
+    if (body.isEmpty()) {
+        return QString();
+    }
+    return "<div>" + body + "</div>";
+}
+
 NotificationManager::NotificationManager()
 : mNextId(1)
 , mConfig(new Config)
@@ -161,15 +180,22 @@ static int timeoutForText(const QString& text)
 
 uint NotificationManager::Notify(const QString& appName, uint replacesId, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int /*timeout*/)
 {
+    NotificationWidget* widget = findWidget(appName, summary);
+    QString cBody = cleanBody(body);
+     // Block already existing notifications
+    if (widget && widget->summary() == summary && widget->body() == cBody) {
+        return replacesId;
+    }
+
     if (replacesId > 0) {
         CloseNotification(replacesId);
     }
 
     // Can we append to an existing notification?
-    NotificationWidget* widget = findWidget(appName, summary);
+    widget = findWidget(appName, summary);
     if (widget && widget->summary() == summary && !body.isEmpty()) {
         int timeout = timeoutForText(body);
-        widget->appendToBody(body, timeout);
+        widget->appendToBody(cBody, timeout);
         return widget->id();
     }
 
@@ -199,7 +225,7 @@ uint NotificationManager::Notify(const QString& appName, uint replacesId, const 
     uint id = mNextId++;
 
     // Create widget
-    widget = new NotificationWidget(appName, id, image, appIcon, summary, body, timeout);
+    widget = new NotificationWidget(appName, id, image, appIcon, summary, cBody, timeout);
 
     // Update config, KCM may have changed it
     mConfig->readConfig();

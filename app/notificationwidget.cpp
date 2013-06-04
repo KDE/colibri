@@ -182,25 +182,6 @@ void FadeOutState::slotFinished()
     mNotificationWidget->emitClosed();
 }
 
-static QString cleanBody(const QString& _body)
-{
-    QString body = _body;
-    if (body.startsWith("<qt>", Qt::CaseInsensitive)) {
-        body = body.mid(4);
-    } else if (body.startsWith("<html>", Qt::CaseInsensitive)) {
-        body = body.mid(6);
-    }
-    if (body.endsWith("</qt>", Qt::CaseInsensitive)) {
-        body.chop(5);
-    } else if (body.endsWith("</html>", Qt::CaseInsensitive)) {
-        body.chop(6);
-    }
-    if (body.isEmpty()) {
-        return QString();
-    }
-    return "<div>" + body + "</div>";
-}
-
 static QPixmap pixmapFromImage(const QImage& image_)
 {
     if (image_.isNull()) {
@@ -234,7 +215,7 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
 , mAppName(appName)
 , mId(id)
 , mSummary(summary)
-, mBody(cleanBody(body))
+, mBody(body)
 , mVisibleTimeLine(new QTimeLine(timeout, this))
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
@@ -320,7 +301,7 @@ void NotificationWidget::updateTextLabel()
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
 {
-    mBody += cleanBody(body);
+    mBody += body;
     mVisibleTimeLine->setDuration(mVisibleTimeLine->duration() + timeout);
     kDebug() << "timeout:" << timeout << "new duration:" << mVisibleTimeLine->duration();
     kDebug() << "body:" << mBody;

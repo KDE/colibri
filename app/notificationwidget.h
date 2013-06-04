@@ -119,6 +119,8 @@ public:
 
     QString summary() const { return mSummary; }
 
+    QString body() const { return mBody; }
+
     QTimeLine* visibleTimeLine() const { return mVisibleTimeLine; }
 
     void appendToBody(const QString&, int timeout);
