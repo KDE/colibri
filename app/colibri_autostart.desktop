@@ -29,6 +29,7 @@ GenericName[pt_BR]=Sistema de notificação
 GenericName[sk]=Systém upozornení
 GenericName[sl]=Sistem obvestil
 GenericName[sv]=Underrättelsesystem
+GenericName[tr]=Bildirim Sistemi
 GenericName[uk]=Система сповіщень
 GenericName[x-test]=xxNotification Systemxx
 Exec=colibri
