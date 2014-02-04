@@ -292,7 +292,7 @@ void NotificationWidget::updateTextLabel()
         text = "<b>" + mSummary + "</b>";
     }
     if (!mBody.isEmpty()) {
-        text += mBody;
+        text += mBody.replace("\n", "<br>");
     }
     mTextLabel->setText(text);
     mTextLabel->resize(mTextLabel->preferredSize());
