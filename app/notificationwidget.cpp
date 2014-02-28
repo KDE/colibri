@@ -148,6 +148,16 @@ void VisibleState::slotFinished()
     switchToState(new FadeOutState(mNotificationWidget));
 }
 
+void VisibleState::onInited()
+{
+    QTimeLine* timeLine = mNotificationWidget->visibleTimeLine();
+    bool wasPaused = timeLine->state() == QTimeLine::Paused;
+    timeLine->start();
+    if (wasPaused) {
+        timeLine->setPaused(true);
+    }
+}
+
 void VisibleState::onMouseOver()
 {
     mNotificationWidget->visibleTimeLine()->setPaused(true);
@@ -170,6 +180,11 @@ FadeOutState::FadeOutState(NotificationWidget* widget)
     anim->setEndValue(0.);
     connect(anim, SIGNAL(finished()), SLOT(slotFinished()));
     anim->start();
+}
+
+void FadeOutState::onInited()
+{
+    switchToState(new FadeInState(mNotificationWidget));
 }
 
 void FadeOutState::onAppended()
@@ -210,13 +225,11 @@ static QPixmap pixmapFromAppIcon(const QString& appIcon)
 ////////////////////////////////////////////////////:
 // NotificationWidget
 ////////////////////////////////////////////////////:
-NotificationWidget::NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout)
+NotificationWidget::NotificationWidget(const QString& appName, uint id)
 : Plasma::Dialog(0, Qt::X11BypassWindowManagerHint)
 , mAppName(appName)
 , mId(id)
-, mSummary(summary)
-, mBody(body)
-, mVisibleTimeLine(new QTimeLine(timeout, this))
+, mVisibleTimeLine(new QTimeLine(1000, this))
 , mScene(new QGraphicsScene(this))
 , mContainer(new QGraphicsWidget)
 , mHLayout(new HLayout(mContainer))
@@ -239,36 +252,21 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
     mBackgroundSvg->setImagePath("dialogs/background");
     mBackgroundSvg->setEnabledBorders(Plasma::FrameSvg::AllBorders);
 
-    // Icon
-    QPixmap pix = pixmapFromImage(image);
-    if (pix.isNull()) {
-        pix = pixmapFromAppIcon(appIcon);
-    }
-
     // UI
     setMinimumHeight(DEFAULT_BUBBLE_MIN_HEIGHT);
 
-    if (!pix.isNull()) {
-        QSize size = pix.size();
-        mIconLabel = new Plasma::Label(mContainer);
-        mIconLabel->nativeWidget()->setPixmap(pix);
-        mIconLabel->nativeWidget()->setFixedSize(size);
-        mIconLabel->setMinimumSize(size);
-        mIconLabel->setMaximumSize(size);
-    }
+    // Icon label
+    mIconLabel = new Plasma::Label(mContainer);
 
+    // Text label
     mTextLabel->setWordWrap(true);
-
     QFontMetrics fm = mTextLabel->nativeWidget()->fontMetrics();
     mTextLabel->setMinimumWidth(20 * fm.averageCharWidth());
     mTextLabel->setMinimumHeight(fm.height());
-    updateTextLabel();
 
     // Layout
-    if (mIconLabel) {
-        mHLayout->addWidget(mIconLabel);
-        mHLayout->setSpacing(ICON_TEXT_SPACING);
-    }
+    mHLayout->addWidget(mIconLabel);
+    mHLayout->setSpacing(ICON_TEXT_SPACING);
     mHLayout->addWidget(mTextLabel);
 
     mScene->addItem(mContainer);
@@ -285,6 +283,32 @@ NotificationWidget::NotificationWidget(const QString& appName, uint id, const QI
         SLOT(updateMouseOverOpacity()));
 }
 
+void NotificationWidget::init(const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout)
+{
+    mVisibleTimeLine->setDuration(timeout);
+
+    QPixmap pix = pixmapFromImage(image);
+    if (pix.isNull()) {
+        pix = pixmapFromAppIcon(appIcon);
+    }
+
+    if (pix.isNull()) {
+        mIconLabel->hide();
+    } else {
+        mIconLabel->show();
+        QSize size = pix.size();
+        mIconLabel->nativeWidget()->setPixmap(pix);
+        mIconLabel->nativeWidget()->setFixedSize(size);
+        mIconLabel->setMinimumSize(size);
+        mIconLabel->setMaximumSize(size);
+    }
+
+    mSummary = summary;
+    mBody = body;
+    updateTextLabel();
+    mState->onInited();
+}
+
 void NotificationWidget::updateTextLabel()
 {
     QString text;
@@ -297,6 +321,14 @@ void NotificationWidget::updateTextLabel()
     mTextLabel->setText(text);
     mTextLabel->resize(mTextLabel->preferredSize());
     mHLayout->update();
+    if (isVisible()) {
+        mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
+        mGrowAnimation->setEasingCurve(QEasingCurve::OutQuad);
+        mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
+        mGrowAnimation->setStartValue(geometry());
+        mGrowAnimation->setEndValue(idealGeometry());
+        mGrowAnimation->start();
+    }
 }
 
 void NotificationWidget::appendToBody(const QString& body, int timeout)
@@ -306,14 +338,6 @@ void NotificationWidget::appendToBody(const QString& body, int timeout)
     kDebug() << "timeout:" << timeout << "new duration:" << mVisibleTimeLine->duration();
     kDebug() << "body:" << mBody;
     updateTextLabel();
-    if (isVisible()) {
-        mGrowAnimation.reset(new QPropertyAnimation(this, "geometry"));
-        mGrowAnimation->setEasingCurve(QEasingCurve::OutQuad);
-        mGrowAnimation->setDuration(GROW_ANIMATION_DURATION);
-        mGrowAnimation->setStartValue(geometry());
-        mGrowAnimation->setEndValue(idealGeometry());
-        mGrowAnimation->start();
-    }
     mState->onAppended();
 }
 

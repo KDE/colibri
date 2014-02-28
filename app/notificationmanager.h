@@ -65,6 +65,7 @@ private:
     Config* mConfig;
 
     NotificationWidget* findWidget(const QString& appName, const QString& summary);
+    NotificationWidget* findWidgetById(uint id);
 };
 
 } // namespace

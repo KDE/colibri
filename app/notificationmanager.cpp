@@ -171,6 +171,28 @@ static QString findImageForSpecImagePath(const QString &_path)
                                            true /* canReturnNull */);
 }
 
+static QImage imageFromHints(const QVariantMap& hints)
+{
+    if (hints.contains("image_data")) {
+        QDBusArgument arg = hints["image_data"].value<QDBusArgument>();
+        return decodeNotificationSpecImageHint(arg);
+    }
+    if (hints.contains("image_path")) {
+        QString path = findImageForSpecImagePath(hints["image_path"].toString());
+        if (!path.isEmpty()) {
+            return QImage(path);
+        }
+    }
+    if (hints.contains("icon_data")) {
+        // This hint was in use in version 1.0 of the spec but has been
+        // replaced by "image_data" in version 1.1. We need to support it for
+        // users of the 1.0 version of the spec.
+        QDBusArgument arg = hints["icon_data"].value<QDBusArgument>();
+        return decodeNotificationSpecImageHint(arg);
+    }
+    return QImage();
+}
+
 static int timeoutForText(const QString& text)
 {
     const int AVERAGE_WORD_LENGTH = 6;
@@ -180,74 +202,66 @@ static int timeoutForText(const QString& text)
 
 uint NotificationManager::Notify(const QString& appName, uint replacesId, const QString& appIcon, const QString& summary, const QString& body, const QStringList& /*actions*/, const QVariantMap& hints, int /*timeout*/)
 {
+    uint id;
+
     NotificationWidget* widget = findWidget(appName, summary);
     QString cBody = cleanBody(body);
-     // Block already existing notifications
+
+    // Block already existing notifications
     if (widget && widget->summary() == summary && widget->body() == cBody) {
         return replacesId;
     }
+    widget = 0;
 
     if (replacesId > 0) {
-        CloseNotification(replacesId);
-    }
-
-    // Can we append to an existing notification?
-    widget = findWidget(appName, summary);
-    if (widget && widget->summary() == summary && !body.isEmpty()) {
-        int timeout = timeoutForText(body);
-        widget->appendToBody(cBody, timeout);
-        return widget->id();
-    }
-
-    QPixmap pix;
-
-    // image
-    QImage image;
-    if (hints.contains("image_data")) {
-        QDBusArgument arg = hints["image_data"].value<QDBusArgument>();
-        image = decodeNotificationSpecImageHint(arg);
-    } else if (hints.contains("image_path")) {
-        QString path = findImageForSpecImagePath(hints["image_path"].toString());
-        if (!path.isEmpty()) {
-            image.load(path);
+        kDebug() << "Trying to replace notification with id" << replacesId;
+        id = replacesId;
+        widget = findWidgetById(replacesId);
+        if (!widget) {
+            kWarning() << "Could not find any notification with id" << replacesId;
         }
-    } else if (hints.contains("icon_data")) {
-        // This hint was in use in version 1.0 of the spec but has been
-        // replaced by "image_data" in version 1.1. We need to support it for
-        // users of the 1.0 version of the spec.
-        QDBusArgument arg = hints["icon_data"].value<QDBusArgument>();
-        image = decodeNotificationSpecImageHint(arg);
+    } else {
+        // Can we append to an existing notification?
+        widget = findWidget(appName, summary);
+        if (widget && widget->summary() == summary && !body.isEmpty()) {
+            int timeout = timeoutForText(body);
+            widget->appendToBody(cBody, timeout);
+            return widget->id();
+        }
     }
 
+    if (!widget) {
+        // Create widget if necessary
+        id = mNextId++;
+        widget = new NotificationWidget(appName, id);
+        connect(widget, SIGNAL(closed(uint, uint)), SLOT(slotNotificationWidgetClosed(uint, uint)));
+        if (mWidgets.isEmpty()) {
+            // Schedule start, but *after* widget has been initialized
+            QMetaObject::invokeMethod(widget, "start", Qt::QueuedConnection);
+        }
+        mWidgets << widget;
+    }
+
+    // Init widget
+    QImage image = imageFromHints(hints);
     int timeout = qBound(2000, timeoutForText(summary + body), 20000);
-
-    // Id
-    uint id = mNextId++;
-
-    // Create widget
-    widget = new NotificationWidget(appName, id, image, appIcon, summary, cBody, timeout);
+    widget->init(image, appIcon, summary, cBody, timeout);
 
     // Update config, KCM may have changed it
     mConfig->readConfig();
     widget->setAlignment(Qt::Alignment(mConfig->alignment()));
     widget->setScreen(mConfig->screen());
-    connect(widget, SIGNAL(closed(uint, uint)), SLOT(slotNotificationWidgetClosed(uint, uint)));
-    mWidgets << widget;
-    if (mWidgets.size() == 1) {
-        widget->start();
-    }
+
     kDebug() << "id:" << id << "app:" << appName << "summary:" << summary << "timeout:" << timeout;
-    kDebug() << "body:" << body;;
+    kDebug() << "body:" << body;
     return id;
 }
 
 void NotificationManager::CloseNotification(uint id)
 {
-    Q_FOREACH(NotificationWidget* widget, mWidgets) {
-        if (widget->id() == id) {
-            widget->closeWidget();
-            return;
-        }
+    NotificationWidget* widget = findWidgetById(id);
+    if (widget) {
+        widget->closeWidget();
     }
 }
 
@@ -287,6 +301,16 @@ void NotificationManager::slotNotificationWidgetClosed(uint id, uint reason)
     if (!mWidgets.isEmpty()) {
         mWidgets.first()->start();
     }
+}
+
+NotificationWidget* NotificationManager::findWidgetById(uint id)
+{
+    Q_FOREACH(NotificationWidget* widget, mWidgets) {
+        if (widget->id() == id) {
+            return widget;
+        }
+    }
+    return 0;
 }
 
 NotificationWidget* NotificationManager::findWidget(const QString& appName, const QString& summary)

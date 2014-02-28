@@ -54,6 +54,7 @@ Q_OBJECT
 public:
     State(NotificationWidget*);
 
+    virtual void onInited() {}
     virtual void onStarted() {}
     virtual void onAppended() {}
     virtual void onMouseOver() {}
@@ -78,6 +79,7 @@ class VisibleState : public State
 Q_OBJECT
 public:
     VisibleState(NotificationWidget* widget);
+    virtual void onInited();
     virtual void onMouseOver();
     virtual void onMouseLeave();
 private Q_SLOTS:
@@ -91,6 +93,7 @@ class FadeOutState : public State
 Q_OBJECT
 public:
     FadeOutState(NotificationWidget* widget);
+    virtual void onInited();
     virtual void onAppended();
 private Q_SLOTS:
     void slotFinished();
@@ -103,11 +106,11 @@ class NotificationWidget : public Plasma::Dialog
 {
     Q_OBJECT
 public:
-    NotificationWidget(const QString& appName, uint id, const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
+    NotificationWidget(const QString& appName, uint id);
 
     Q_PROPERTY(qreal fadeOpacity READ fadeOpacity WRITE setFadeOpacity)
 
-    void start();
+    void init(const QImage& image, const QString& appIcon, const QString& summary, const QString& body, int timeout);
 
     void setAlignment(Qt::Alignment);
 
@@ -135,6 +138,9 @@ public:
 
 Q_SIGNALS:
     void closed(uint id, uint reason);
+
+public Q_SLOTS:
+    void start();
 
 private Q_SLOTS:
     void updateOpacity();
