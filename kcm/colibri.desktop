@@ -34,6 +34,7 @@ X-KDE-Keywords[sv]=underrättelse
 X-KDE-Keywords[tr]=bildirim
 X-KDE-Keywords[ug]=ئۇقتۇرۇش
 X-KDE-Keywords[uk]=notification,сповіщення
+X-KDE-Keywords[x-test]=xxnotificationxx
 
 Name=Colibri Notifications
 Name[bs]=Colibri napomene
@@ -59,6 +60,7 @@ Name[sl]=Obvestila Colibri
 Name[sv]=Underrättelser från Colibri
 Name[tr]=Colibri Bildirimleri
 Name[uk]=Сповіщення Colibri
+Name[x-test]=xxColibri Notificationsxx
 
 Comment=Configure Colibri notifications
 Comment[bs]=Konfigurišite Colibri napomene
@@ -84,3 +86,4 @@ Comment[sl]=Nastavi obvestila Colibri
 Comment[sv]=Anpassa underrättelser från Colibri
 Comment[tr]=Colibri bildirimlerini yapılandır
 Comment[uk]=Налаштувати сповіщення Colibri
+Comment[x-test]=xxConfigure Colibri notificationsxx
